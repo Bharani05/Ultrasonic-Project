@@ -1,0 +1,50 @@
+#include <linux/module.h>
+#include <linux/kernel.h>
+#include <linux/workqueue.h>
+
+MODULE_LICENSE("GPL");
+
+// Define a workqueue
+static struct workqueue_struct *my_workqueue;
+
+// Define the work function
+static void my_work_function(struct work_struct *work) {
+    printk(KERN_INFO "Static method: Workqueue task is running.\n");
+}
+
+// Declare and initialize a work item
+static DECLARE_WORK(my_work, my_work_function);
+
+// Static method to schedule work
+static void schedule_work_in_static_method(void) {
+    // Queue the work item
+    queue_work(my_workqueue, &my_work);
+}
+
+// Module initialization
+static int __init my_init(void) {
+    // Create the workqueue
+    my_workqueue = create_workqueue("my_workqueue");
+    if (!my_workqueue) {
+        printk(KERN_ERR "Failed to create workqueue.\n");
+        return -ENOMEM;
+    }
+
+    // Schedule work
+    schedule_work_in_static_method();
+
+    printk(KERN_INFO "Static method: Module loaded successfully.\n");
+    return 0;
+}
+
+// Module cleanup
+static void __exit my_exit(void) {
+    // Flush and destroy the workqueue
+    flush_workqueue(my_workqueue);
+    destroy_workqueue(my_workqueue);
+
+    printk(KERN_INFO "Static method: Module unloaded successfully.\n");
+}
+
+module_init(my_init);
+module_exit(my_exit);
