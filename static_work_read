@@ -1,0 +1,92 @@
+#include <linux/module.h>
+#include <linux/kernel.h>
+#include <linux/workqueue.h>
+#include <linux/proc_fs.h>
+#include <linux/uaccess.h>
+
+MODULE_LICENSE("GPL");
+
+#define PROC_ENTRY_NAME "workqueue_static_method"
+
+// Define a workqueue
+static struct workqueue_struct *my_workqueue;
+
+// Define the work function
+static void my_work_function(struct work_struct *work) {
+    printk(KERN_INFO "Static method: Workqueue task is running.\n");
+}
+
+// Declare and initialize a work item
+static DECLARE_WORK(my_work, my_work_function);
+
+// Read buffer for the /proc file
+static char proc_buffer[256];
+
+// Function to handle read operation from /proc file
+static ssize_t proc_read(struct file *filp, char __user *buffer, size_t length, loff_t *offset) {
+    ssize_t count = 0;
+    if (*offset > 0) return 0; // End of file
+
+    // Copy data to user space
+    count = simple_read_from_buffer(buffer, length, offset, proc_buffer, strlen(proc_buffer));
+    return count;
+}
+
+// Function to handle write operation to /proc file
+static ssize_t proc_write(struct file *filp, const char __user *buffer, size_t length, loff_t *offset) {
+    ssize_t count = 0;
+    if (length > sizeof(proc_buffer)) return -EINVAL;
+
+    // Copy data from user space
+    if (copy_from_user(proc_buffer, buffer, length)) return -EFAULT;
+    proc_buffer[length] = '\0'; // Null-terminate the string
+    count = length;
+
+    // Schedule work
+    schedule_work_in_static_method();
+
+    return count;
+}
+
+// File operations structure for the /proc file
+static const struct file_operations proc_fops = {
+    .read = proc_read,
+    .write = proc_write,
+};
+
+// Static method to schedule work
+static void schedule_work_in_static_method(void) {
+    // Queue the work item
+    queue_work(my_workqueue, &my_work);
+}
+
+// Module initialization
+static int __init my_init(void) {
+    // Create the workqueue
+    my_workqueue = create_workqueue("my_workqueue");
+    if (!my_workqueue) {
+        printk(KERN_ERR "Failed to create workqueue.\n");
+        return -ENOMEM;
+    }
+
+    // Create /proc entry
+    proc_create(PROC_ENTRY_NAME, 0666, NULL, &proc_fops);
+
+    printk(KERN_INFO "Static method: Module loaded successfully.\n");
+    return 0;
+}
+
+// Module cleanup
+static void __exit my_exit(void) {
+    // Remove /proc entry
+    remove_proc_entry(PROC_ENTRY_NAME, NULL);
+
+    // Flush and destroy the workqueue
+    flush_workqueue(my_workqueue);
+    destroy_workqueue(my_workqueue);
+
+    printk(KERN_INFO "Static method: Module unloaded successfully.\n");
+}
+
+module_init(my_init);
+module_exit(my_exit);
