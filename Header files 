@@ -1,0 +1,102 @@
+Sure, let me explain each of the header files included in this code:
+
+1. `<linux/module.h>`:
+    - This header file provides functions and macros for kernel modules, such as module initialization and cleanup.
+
+2. `<linux/kernel.h>`:
+    - Contains kernel-level functions and macros, such as printing messages to the kernel log.
+
+3. `<linux/sched.h>`:
+    - Provides access to task-related functions and data structures, such as the task struct and scheduler operations.
+
+4. `<linux/wait.h>`:
+    - Contains functions and macros related to waiting for events, such as wait queues and condition variables.
+
+5. `<linux/init.h>`:
+    - Contains macros for module initialization and cleanup.
+
+6. `<linux/fs.h>`:
+    - Provides file system-related functions and data structures, such as file operations and inodes.
+
+7. `<linux/mm.h>`:
+    - Contains functions and data structures for memory management, such as memory mapping.
+
+8. `<linux/slab.h>`:
+    - Provides memory allocation functions like `kmalloc()` and `kfree()`.
+
+9. `<linux/poll.h>`:
+    - Contains functions and data structures related to poll and select system calls for I/O multiplexing.
+
+10. `<linux/uaccess.h>`:
+    - Provides functions for user-space memory access from kernel space, such as `copy_to_user()` and `copy_from_user()`.
+
+11. `<linux/io.h>`:
+    - Contains functions for accessing hardware I/O ports and memory-mapped I/O.
+
+12. `<linux/platform_device.h>`:
+    - Defines structures and functions for platform devices in the Linux kernel.
+
+13. `<linux/version.h>`:
+    - Contains macros for kernel version information.
+
+14. `<linux/kthread.h>`:
+    - Provides functions for kernel threads, such as creating and managing kernel threads.
+
+15. `<linux/time.h>`:
+    - Contains functions and data structures for handling time in the kernel.
+
+16. `<linux/delay.h>`:
+    - Provides functions for delaying execution for a specified amount of time.
+
+17. `<linux/seq_file.h>`:
+    - Contains functions for implementing sequential files in the Linux kernel, used for procfs and sysfs interfaces.
+
+18. `<media/v4l2-device.h>`:
+    - Header file for Video4Linux2 (V4L2) device interface.
+
+19. `<media/v4l2-event.h>`:
+    - Header file for V4L2 events.
+
+20. `<media/v4l2-ioctl.h>`:
+    - Header file for V4L2 ioctl operations.
+
+21. `<media/videobuf2-v4l2.h>`:
+    - Header file for Video Buffer 2 (VB2) V4L2 helper functions and data structures.
+
+22. `<media/v4l2-ctrls.h>`:
+    - Header file for V4L2 control handling.
+
+23. `<media/videobuf2-vmalloc.h>`:
+    - Header file for Video Buffer 2 (VB2) vmalloc-based memory allocation.
+
+24. `"linux/v412-ext/v4l2-ext-renderer.h"`:
+    - Custom header file for V4L2 extension renderer.
+
+25. `"os_util.h"`:
+    - Custom header file containing utility functions related to the operating system.
+
+26. `"base_device.h"`:
+    - Custom header file containing definitions related to the base device.
+
+27. `"v412_dolby.h"`:
+    - Custom header file containing definitions related to V412 Dolby functionality.
+
+28. `"de_def.h"`:
+    - Custom header file containing definitions related to DE (Data Encryption) functionality.
+
+29. `"de_kapi.h"`:
+    - Custom header file containing kernel API declarations related to DE.
+
+30. `"de_to.h"`:
+    - Custom header file containing definitions related to DE timeout functionality.
+
+31. `"de_sync.h"`:
+    - Custom header file containing definitions related to DE synchronization functionality.
+
+32. `"v412_vsc_event.h"`:
+    - Custom header file containing definitions related to V412 VSC (Virtual Smart Card) events.
+
+33. `"dolby_io.h"`:
+    - Custom header file containing definitions related to Dolby I/O functionality.
+
+These header files provide various functionalities and interfaces needed for the Linux kernel module being developed, including device management, memory management, hardware I/O access, time handling, and custom functionality related to the V412 device and its components.
