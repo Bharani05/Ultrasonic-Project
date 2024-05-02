@@ -18,6 +18,7 @@ static ssize_t etx_write(struct file *filp,
         kfree(kernel_buffer);
         return -EFAULT;
     }
+echo "Hello, this is a test" > /dev/etx_device
 
     // Null terminate the string
     kernel_buffer[len] = '\0';
