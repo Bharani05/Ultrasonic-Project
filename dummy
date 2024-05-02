@@ -1,3 +1,38 @@
+
+
+
+/*
+** This function will be called when we read the Device file
+*/ 
+static ssize_t etx_read(struct file *filp, 
+                char __user *buf, size_t len, loff_t *off)
+{
+    pr_info("Read function\n");
+    char *kernel_buffer = "This data is from kernel space";
+    int ret;
+
+    // Check if offset is past the end of the message
+    if (*off >= strlen(kernel_buffer))
+        return 0; // End of file
+
+    // Adjust the length
+    if (len > (strlen(kernel_buffer) - *off))
+        len = strlen(kernel_buffer) - *off;
+
+    // Copy data to user space
+    ret = copy_to_user(buf, kernel_buffer + *off, len);
+    if (ret) {
+        pr_err("Failed to send data to user space\n");
+        return -EFAULT;
+    }
+
+    // Move offset
+    *off += len;
+    pr_info("Sent %d bytes to the user\n", len);
+
+    return len;
+}
+
 /*
 ** This function will be called when we write the Device file
 */
@@ -5,7 +40,8 @@ static ssize_t etx_write(struct file *filp,
                 const char __user *buf, size_t len, loff_t *off)
 {
     pr_info("Write Function\n");
-    char *kernel_buffer = kmalloc(len + 1, GFP_KERNEL); // Allocate memory for the buffer
+    char *kernel_buffer = kmalloc(len, GFP_KERNEL);
+    int ret;
 
     if (!kernel_buffer) {
         pr_err("Failed to allocate memory\n");
@@ -13,15 +49,12 @@ static ssize_t etx_write(struct file *filp,
     }
 
     // Copy data from user space
-    if (copy_from_user(kernel_buffer, buf, len)) {
+    ret = copy_from_user(kernel_buffer, buf, len);
+    if (ret) {
         pr_err("Failed to receive data from user space\n");
         kfree(kernel_buffer);
         return -EFAULT;
     }
-echo "Hello, this is a test" > /dev/etx_device
-
-    // Null terminate the string
-    kernel_buffer[len] = '\0';
 
     pr_info("Received data from user space: %s\n", kernel_buffer);
     kfree(kernel_buffer);
