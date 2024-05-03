@@ -1,0 +1,154 @@
+Let's break down the code step by step:
+
+### Structures:
+```c
+struct dolby_dev {
+    struct v4l2_device      v4l2_dolby_dev;
+    struct video_device     v4l2_dolby_video_dev;
+    struct mutex            v4l2_dolby_video_device_lock;
+    struct list_head        vb_dolby_cap_list;
+    struct vb2_queue        vb_dolby_cap_q;
+    spinlock_t              slock;
+    struct task_struct      *dolby_cap_thread;
+    BOOLEAN                 _IsCapThreadRunning;
+};
+
+struct dolby_cap_buffer {
+    /* common v4l buffer stuff -- must be first */
+    struct vb2_v4l2_buffer vb;
+    struct list_head list;
+};
+
+struct dolby_fh {
+    struct v4l2_fh fh;
+    // need to add some private data
+    struct dolby_priv *dolby_priv;
+};
+```
+Explanation:
+- `dolby_dev`: Represents the Dolby device, containing various components such as V4L2 device, video device, mutex for video device, capture buffer list, capture queue, spinlock, capture thread, and a boolean flag to indicate whether the capture thread is running.
+- `dolby_cap_buffer`: Represents a buffer used for Dolby capture, containing a V4L2 buffer and a list head.
+- `dolby_fh`: Represents a file handle for Dolby, containing a V4L2 file handle and a pointer to private data (`dolby_priv`).
+
+### Global Variables:
+```c
+static struct v4l2_ext_dolby_gd_delay_param g_stdolbyGDVal;
+static struct v4l2_ext_dolby_picture_mode g_stPictureMode = {1,1}; // default for bright mode for pioneer
+static struct v4l2_ext_dolby_picture_data g_stPictureData = {0,1,100}; // default for backlight value for pioneer
+static struct v4l2_ext_dolby_ambient_light_param g_stAmbientData;
+static int g_nPDStatus;
+static int g_dbgBackligthValue;
+static int g_dbgBrightnessValue;
+static int g_dbgContrastValue;
+static int g_dbgColorValue;
+
+char *g_cfgpaths[3] = {NULL,NULL,NULL};
+char _g_strBestPQPath[MAX_NAME_LENGTH];
+char _g_strMainPQPath[MAX_NAME_LENGTH];
+DOLBY_LEVEL_L11_DATA_T g_slevel_MD;
+enum v4l2_ext_dolby_config_type g_eConfigType;
+static int _g_dev_opend = 0;
+static LX_DOLBY_MODE_T _g_dolby_state = LX_DOLBY_DEFAULT_MODE;
+static LX_DOLBY_IO_MAP_T g_sDolbyInitParam;
+struct dolby_priv *gp_prvData;
+/* Coverity issue 276120 fix */
+static int _gExitStatus = 0;
+```
+Explanation:
+- Various global variables used throughout the Dolby module:
+    - `g_stdolbyGDVal`: Structure for Dolby GD (Global Dimming) delay parameters.
+    - `g_stPictureMode`: Structure for Dolby picture mode.
+    - `g_stPictureData`: Structure for Dolby picture data.
+    - `g_stAmbientData`: Structure for Dolby ambient light parameters.
+    - `g_nPDStatus`: Status variable.
+    - `g_dbgBackligthValue`, `g_dbgBrightnessValue`, `g_dbgContrastValue`, `g_dbgColorValue`: Debugging variables.
+    - `g_cfgpaths`: Array of paths.
+    - `_g_strBestPQPath`, `_g_strMainPQPath`: Strings for paths.
+    - `g_slevel_MD`: Structure for Dolby level MD (Metadata).
+    - `g_eConfigType`: Enumeration for Dolby configuration type.
+    - `_g_dev_opend`: Count of opened devices.
+    - `_g_dolby_state`: Dolby mode.
+    - `g_sDolbyInitParam`: Structure for Dolby initialization parameters.
+    - `gp_prvData`: Pointer to Dolby private data.
+    - `_gExitStatus`: Exit status.
+
+### Functions:
+```c
+struct dolby_priv *new_dolby_priv(void);
+static int vpq_get_ext_dolby_data(struct v4l2_ext_control *ctrl);
+static int v4l2_set_ext_ctrl_dolby_driver(struct v4l2_ext_control *ctrl);
+extern void DOLBY_PROC_Init(void);
+static inline struct dolby_cap_buffer *to_dolby_cap_buffer(struct vb2_buffer *vb2);
+static char *ctrl_id_ext_to_str(int id);
+```
+Explanation:
+- `new_dolby_priv()`: Allocates memory for a new Dolby private data structure.
+- `vpq_get_ext_dolby_data()`: Gets Dolby data from V4L2 extended controls.
+- `v4l2_set_ext_ctrl_dolby_driver()`: Sets Dolby driver extended controls in V4L2.
+- `DOLBY_PROC_Init()`: Initializes Dolby procedure.
+- `to_dolby_cap_buffer()`: Converts a VB2 buffer to a Dolby capture buffer.
+- `ctrl_id_ext_to_str()`: Converts extended control IDs to strings.
+
+### Code Flow:
+```c
+static int dolby_notification(struct dolby_priv *p)
+{
+    struct v4l2_event evt;
+    int info = 0x11223344;
+
+    memset(&evt, 0, sizeof(evt));
+    evt.type = V4L2_EVENT_CTRL;
+    evt.id   = p->event;
+    memcpy(evt.u.data, &info, sizeof(info));
+    v4l2_event_queue(p->dolby_vdev, &evt);
+
+    DE_NOTI("Post  %x - evt.type[0x%x] evt.id[0x%x]", \
+            info, evt.type, evt.id);
+
+    return 0;
+}
+
+static void dolby_noti_ws(struct work_struct *work)
+{
+    struct dolby_priv *p;
+    p = container_of(work, struct dolby_priv, dolby_noti_work);
+    dolby_notification(p);
+}
+
+static void process_poll(struct dolby_priv *p)
+{
+    queue_work(system_wq, &p->dolby_noti_work);
+}
+
+static int v4l2_dolby_fh_open(struct file *filp)
+{
+    int ret = 0;
+    struct video_device *vdev = video_devdata(filp);
+    struct dolby_priv *p;
+    struct dolby_fh *fh;
+
+    if(_g_dev_opend){
+        DE_NOTI("dolby: Already in use...\n");
+        return -EBUSY;
+    }
+
+    DE_NOTI("dolby: open...\n");
+
+    fh = kzalloc(sizeof(struct dolby_fh), GFP_KERNEL);
+    if (!fh)
+    {
+        DE_ERROR("dolby: allocation of file handle failed \n");
+        ret = -ENOMEM;
+        return ret;
+    }
+
+    p = new_dolby_priv();
+    if(!p)
+    {
+        DE_ERROR("alloc of dolby priv failed");
+        ret = -ENOMEM;
+        goto fail_fh;
+    }
+
+    INIT_WORK(&p->dolby_noti_work, dolby_noti_ws);
+   
