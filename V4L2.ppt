@@ -154,3 +154,50 @@ The transition from Video4Linux (V4L) to Video4Linux2 (V4L2) brought several sig
    - Video device drivers implemented the V4L2 API, ensuring compatibility with V4L2-compliant applications.
 
 Overall, the transition from V4L to V4L2 brought significant improvements in functionality, flexibility, performance, and ease of use, making it the standard API for video capture and output devices on Linux systems.
+
+
+
+
+Here's a simplified diagram illustrating the architecture of Video4Linux2 (V4L2):
+
+```
++---------------------------------+
+|           Application           |
+|                                 |
+|    +-----------------------+    |
+|    |        V4L2 API       |    |
+|    +-----------+-----------+    |
+|                |                |
+|    +-----------v-----------+    |
+|    |       V4L2 Core       |    |
+|    +-----------+-----------+    |
+|                |                |
+|    +-----------v-----------+    |
+|    |   Hardware Abstraction|    |
+|    |       Layer (HAL)     |    |
+|    +-----------+-----------+    |
+|                |                |
+|    +-----------v-----------+    |
+|    |     Device Drivers    |    |
+|    +-----------------------+    |
+|                |                |
+|    +-----------v-----------+    |
+|    |     Video Devices     |    |
++---------------------------------+
+```
+
+Explanation:
+
+- **Application**: The top layer where applications, such as multimedia frameworks or custom applications, reside.
+
+- **V4L2 API**: Provides a standardized interface for applications to interact with video devices.
+
+- **V4L2 Core**: Part of the Linux kernel responsible for managing video devices.
+
+- **Hardware Abstraction Layer (HAL)**: Provides a layer of abstraction between the V4L2 core and device drivers, standardizing access to different video devices.
+
+- **Device Drivers**: Kernel modules responsible for communicating with specific video capture and output hardware.
+
+- **Video Devices**: Video capture and output devices, such as webcams, TV tuner cards, and displays.
+
+This architecture allows applications to interact with video devices through a standardized API, providing a unified interface for accessing video devices on Linux systems.
