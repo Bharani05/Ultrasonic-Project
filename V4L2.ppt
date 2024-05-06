@@ -201,3 +201,19 @@ Explanation:
 - **Video Devices**: Video capture and output devices, such as webcams, TV tuner cards, and displays.
 
 This architecture allows applications to interact with video devices through a standardized API, providing a unified interface for accessing video devices on Linux systems.
+
+Video4Linux (V4L) is a kernel framework that provides an interface to handle video capture devices on Linux systems. It allows applications to capture video from devices such as webcams, TV tuner cards, and digital cameras. 
+
+Key features of V4L include:
+
+1. **Device Support**: V4L supports a wide range of video capture devices, including both analog and digital devices.
+
+2. **Video Capture**: Applications can capture video frames and audio samples from video devices using V4L.
+
+3. **Device Control**: V4L provides mechanisms for applications to control video device parameters such as resolution, frame rate, and exposure.
+
+4. **Memory Mapping**: V4L supports memory-mapped access to video buffers for efficient data transfer between the device and the application.
+
+5. **Streaming**: V4L supports streaming video data from capture devices to applications for real-time processing and display.
+
+V4L has been superseded by Video4Linux2 (V4L2), which provides a more modern and flexible API with additional features and improved performance. However, V4L is still referenced in some older documentation and code.
