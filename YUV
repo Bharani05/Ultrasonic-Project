@@ -202,3 +202,60 @@ int main()
 	fclose(output);
 	return 1;
 }
+
+// bh
+
+#include <stdio.h>
+#include <stdint.h>
+
+int main()
+{
+    // Array of input file names
+    char *input_files[] = {
+        "1920x1080_UYVY_12b_frame_1.yuv",
+        "1920x1080_UYVY_12b_frame_2.yuv",
+        // Add more file names here as needed
+    };
+
+    // Total number of files
+    int num_files = sizeof(input_files) / sizeof(input_files[0]);
+
+    // Open each input file, extract data, and write to output files
+    for (int i = 0; i < num_files; i++)
+    {
+        FILE *fp;
+        FILE *output;
+
+        // Open input file for reading
+        fp = fopen(input_files[i], "rb");
+        if (fp == NULL)
+        {
+            printf("Error opening input file: %s\n", input_files[i]);
+            return 1;
+        }
+
+        // Open output file for writing
+        output = fopen(input_files[i], "wb");
+        if (output == NULL)
+        {
+            printf("Error creating output file: %s\n", input_files[i]);
+            fclose(fp); // Close input file before exiting
+            return 1;
+        }
+
+        // Extract data from input file and write to output file
+        int c;
+        while ((c = fgetc(fp)) != EOF)
+        {
+            fputc(c, output);
+        }
+
+        // Close files after extraction
+        fclose(fp);
+        fclose(output);
+
+        printf("File extracted: %s\n", input_files[i]);
+    }
+
+    return 0;
+}
