@@ -113,3 +113,56 @@ int main() {
     extractFrames(inputFilename);
     return 0;
 }
+
+
+///extract a file 12bpp
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#define FRAME_WIDTH 1920 // Adjust according to your frame size
+#define FRAME_HEIGHT 1080 // Adjust according to your frame size
+#define BITS_PER_PIXEL 12
+
+void extractFrames(const char *inputFilename) {
+    FILE *inputFile = fopen(inputFilename, "rb");
+    if (inputFile == NULL) {
+        printf("Error opening input file.\n");
+        return;
+    }
+
+    int frameSize = FRAME_WIDTH * FRAME_HEIGHT * 3 / 2; // Assuming 4:2:0 format
+    unsigned char *frameData = (unsigned char *)malloc(frameSize);
+    if (frameData == NULL) {
+        printf("Memory allocation failed.\n");
+        fclose(inputFile);
+        return;
+    }
+
+    int frameCount = 0;
+    while (fread(frameData, 1, frameSize, inputFile) == frameSize) {
+        char outputFilename[50]; // Adjust buffer size accordingly
+        sprintf(outputFilename, "frame_%d.yuv", frameCount);
+
+        FILE *outputFile = fopen(outputFilename, "wb");
+        if (outputFile == NULL) {
+            printf("Error creating output file.\n");
+            free(frameData);
+            fclose(inputFile);
+            return;
+        }
+
+        fwrite(frameData, 1, frameSize, outputFile);
+        fclose(outputFile);
+        frameCount++;
+    }
+
+    free(frameData);
+    fclose(inputFile);
+}
+
+int main() {
+    const char *inputFilename = "input.yuv"; // Replace with your input file name
+    extractFrames(inputFilename);
+    return 0;
+}
