@@ -1,0 +1,55 @@
+To efficiently extract each frame from a raw YUV file with 12-bit depth and convert it to 10-bit depth using C, you can follow these steps:
+
+1. Read the raw YUV file into memory.
+2. Parse the YUV data, extracting each frame.
+3. Convert the pixel values from 12-bit to 10-bit depth.
+4. Write the modified frames to a new YUV file.
+
+Here's a basic outline of how you can implement this in C:
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+#define FRAME_WIDTH  // define your frame width
+#define FRAME_HEIGHT // define your frame height
+#define BITS_PER_PIXEL 12 // bits per pixel in the input file
+#define OUTPUT_BITS_PER_PIXEL 10 // bits per pixel in the output file
+
+void convert12to10(const unsigned char *in, unsigned char *out, int size) {
+    // Convert 12-bit to 10-bit depth
+    for (int i = 0; i < size; i += 3) {
+        unsigned short val = (in[i] << 4) | (in[i + 1] >> 4);
+        out[i * 5 / 6] = (val >> 2) & 0xFF;
+        out[i * 5 / 6 + 1] = ((val & 0x3) << 6) | (in[i + 1] & 0x3F);
+    }
+}
+
+int main() {
+    FILE *inputFile = fopen("input.yuv", "rb");
+    FILE *outputFile = fopen("output.yuv", "wb");
+    if (inputFile == NULL || outputFile == NULL) {
+        printf("Error opening files.\n");
+        return 1;
+    }
+
+    unsigned char *buffer12 = (unsigned char *)malloc(FRAME_WIDTH * FRAME_HEIGHT * 3); // Assuming 4:2:0 format
+    unsigned char *buffer10 = (unsigned char *)malloc(FRAME_WIDTH * FRAME_HEIGHT * 3 * 5 / 6); // Buffer for 10-bit output
+
+    int frameSize = FRAME_WIDTH * FRAME_HEIGHT * 3;
+
+    while (fread(buffer12, 1, frameSize, inputFile) == frameSize) {
+        convert12to10(buffer12, buffer10, frameSize);
+        fwrite(buffer10, 1, frameSize * 5 / 6, outputFile);
+    }
+
+    free(buffer12);
+    free(buffer10);
+    fclose(inputFile);
+    fclose(outputFile);
+
+    return 0;
+}
+```
+
+Please note that this is a basic example and may need adjustments based on your specific requirements and the exact format of your YUV file. Additionally, you'll need to define the frame width and height based on your YUV format.
