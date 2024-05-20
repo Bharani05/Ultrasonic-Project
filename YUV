@@ -166,3 +166,39 @@ int main() {
     extractFrames(inputFilename);
     return 0;
 }
+
+// bharani
+
+#include <stdio.h>
+#include<stdint.h>
+
+
+int main()
+{
+	FILE *fp;
+	
+	char c;
+	size_t SIZE=8294400;
+	fp = fopen ("5052_1920x1080_UYVY_12b (1).yuv", "rb");
+	
+	if(fp == NULL){
+		printf("Error openning \n");
+		return 1;
+	}
+	
+	char input[]="1920x1080_UYVY_12b_frame_1.yuv";
+	FILE *output=fopen(input,"wb");
+
+	size_t temp=0;
+
+	while(temp<SIZE)
+		{
+		c=fgetc(fp);
+		fputc(c,output);
+		temp++;
+		}
+
+	fclose(fp);
+	fclose(output);
+	return 1;
+}
