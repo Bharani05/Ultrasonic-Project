@@ -315,5 +315,67 @@ int main()
 	fclose(fp);
 	return 0;
 }
-					
+
+//pixel 2
+
+
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+
+#define TF 46
+#define TF_SIZE 381542400
+
+int main()
+{
+    FILE *fp = fopen("5052_1920x1080_UYVY_12b (1).yuv", "rb");
+    if (fp == NULL)
+    {
+        printf("Error opening input file.\n");
+        return 1;
+    }
+
+    size_t Fsize = TF_SIZE / TF;
+    for (int i = 0; i < TF; i++)
+    {
+        char output_file[256];
+        sprintf(output_file, "1920x1080_UYVY_10bframe_%d.yuv", i + 1);
+        FILE *frame = fopen(output_file, "wb");
+        if (frame == NULL)
+        {
+            printf("Error creating output file %s\n", output_file);
+            fclose(fp);
+            return 1;
+        }
+
+        size_t TP = Fsize / 6;
+        size_t FOsize = (Fsize / 12) * 10;
+
+        char *input = malloc(Fsize * sizeof(char));
+        char *output = malloc(FOsize * sizeof(char));
+
+        fread(input, sizeof(char), Fsize, fp);
+
+        size_t input_index = 0;
+        size_t output_index = 0;
+        for (size_t i = 0; i < TP; i++)
+        {
+            uint32_t pixel_a = 0;
+            for (int j = 0; j < 2; j++) // Only need 2 bytes (12 bits) per pixel
+            {
+                pixel_a |= (uint32_t)input[input_index++] << (8 * j);
+            }
+            for (int k = 0; k < 4; k++)
+            {
+                uint32_t ten_bits = (pixel_a >> (10 * k)) & 0x3FF; // Extract 10 bits
+                output[output_index++] = (char)(ten_bits >> 2);    // Store the 8 most significant bits
+            }
+        }
+        fwrite(output, sizeof(char), FOsize, frame);
+
+        fclose(frame);
+    }
+    fclose(fp);
+    return 0;
+}					
 			
