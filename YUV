@@ -295,16 +295,17 @@ int main()
 			size_t output_index=0;
 			for(size_t i=0;i<TP;i++)
 				{
-					uint64_t pixel_a=0;
-					for(int j=0;j<6;j++)
+					uint32_t pixel_a=0;
+					for(int j=0;j<2;j++)
 						{
-							pixel_a=pixel_a|(uint64_t)input[input_index++]<<(8*(5-j));
+							pixel_a=pixel_a|(uint8_t)input[input_index++]<<(8*j);
 						}
-					for(int k=3;k>=0;k--)
+					for(int k=0;k<4;k++)
 						{
-							uint64_t twelve_bits=pixel_a >> (12*k);
-							uint64_t ten_bits=twelve_bits;
-							output[output_index++]=ten_bits >>2;
+							uint32_t twelve_bits=pixel_a >> (10*k)&0x3FF;
+	
+							output[output_index++]=(char)(twelve_bits>>2);
+						
 						}
 				}
 			fwrite(output, sizeof(char), FOsize, frame);
