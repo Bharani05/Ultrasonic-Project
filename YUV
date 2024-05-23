@@ -377,5 +377,76 @@ int main()
     }
     fclose(fp);
     return 0;
-}					
+}		
+
+//yuv_4k.c
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+
+#define FRAME_WIDTH 3840 
+#define FRAME_HEIGHT 2160 
+#define BITS_PER_PIXEL 2
+#define FILE_NAME 256
+
+
+void extractFrames(FILE *fp) {
+   
+
+    int frameSize = (((FRAME_WIDTH * FRAME_HEIGHT) * BITS_PER_PIXEL) * 2);
+    uint32_t TP = frameSize/2;
+	//printf("%d ",frameSize);
+    unsigned char *frameData = (unsigned char *)malloc(frameSize);
+    uint16_t *output = (uint16_t*)malloc(frameSize);
+    
+    int frameCount = 0;
+    while (fread(frameData,sizeof(unsigned char) , frameSize, fp)) 
+    {
+        char outputFilename[FILE_NAME];
+        sprintf(outputFilename, "3840x2160_UYVY_10b_frame_%d.yuv", frameCount);
+
+        FILE *outputFile = fopen(outputFilename, "wb");
+        if (outputFile == NULL) {
+            printf("Error creating output file.\n");
+            free(frameData);
+            fclose(fp);
+            return;
+        }
+        uint32_t input_index=0;
+        uint32_t output_index=0;
+        for (size_t k=0; k < TP; k++)
+    		{
+    			uint16_t pixel_a = 0;
+    			for (int j = 0; j < 2; j++)
+    			{
+    				pixel_a = pixel_a | ((uint16_t)frameData[input_index++] << (8 * j));
+    			}
+    
+    			uint16_t ten_bits = (pixel_a >> 2);
+    			output[output_index++] = ten_bits;
+    		}
+    		fwrite(output, sizeof(uint16_t), frameSize/2, outputFile);
+            fclose(outputFile);
+            frameCount++;
+    }
+
+    free(frameData);
+}
+
+int main() {
+    
+    FILE *inputFile = fopen("5034_Artglass_3840x2160_UYVY_12b.yuv", "rb");
+    if (inputFile == NULL) {
+        printf("Error opening input file.\n");
+        return 0;
+    }
+    extractFrames(inputFile);
+    fclose(inputFile);
+    return 0;
+}
+
+
+
 			
