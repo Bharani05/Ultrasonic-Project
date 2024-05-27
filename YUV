@@ -446,7 +446,64 @@ int main() {
     fclose(inputFile);
     return 0;
 }
+// extract.c
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
 
+#define FRAME_WIDTH 1920
+#define FRAME_HEIGHT 1080
+#define BIT_DEPTH 2
+#define FILE_NAME 50
+
+
+int main(){
+        int ret = 0;
+
+        FILE *fp = fopen("5330_TestSet_BL_decoder_out_1920x1080_420_10b.yuv", "rb");
+        if (fp == NULL) {
+                printf("Error opening input file.\n");
+                        return 0;
+        }
+
+
+                int frameSize = (((FRAME_WIDTH * FRAME_HEIGHT) * BIT_DEPTH) * 1.5);
+
+
+
+                uint8_t *output = (uint8_t *) calloc(frameSize, sizeof(uint8_t));
+
+                int frameCount = 0;
+                fseek (fp, 0, SEEK_END);
+                //printf("%ld ", ftell(fp));
+
+                int i;
+                int vals=ftell(fp);
+                printf("%d ",vals);
+                int val = (vals/frameSize);
+                printf("%d ",val);
+                rewind(fp);
+
+
+
+                for(i=0; i < val; i++){
+                fread(output,  frameSize,1, fp);
+                char outputFilename[FILE_NAME];
+                sprintf(outputFilename,  "1920x1080_420_10b_(%d).yuv", frameCount);
+
+                FILE *outputFile = fopen(outputFilename, "wb");
+                if (outputFile == NULL){
+                        printf("Error Openning OutputFile");
+
+                        return 1;
+                }
+                fwrite(output,  frameSize,1, outputFile);
+                fclose(outputFile);
+                frameCount++;
+
+                }
+                free(output);
+}
 
 
 			
