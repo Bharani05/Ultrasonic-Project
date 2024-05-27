@@ -575,6 +575,15 @@ int main()
 	fclose(fp);
 	return 0;
 }
+// ASS_5
+This assignment is little bit difficult.
+
+I am sharing a YUV422 10 bit semi planar YUV data  without padding.(continous pixel data is stored.)
+
+U need to convert each YUV file to YUV422 10 bit interleaved padded data.
+
+Chroma_Offset	= 2592768 (Starting offset fro UV data)
+Each Row Offset     =  1920
 					
 			
 			
