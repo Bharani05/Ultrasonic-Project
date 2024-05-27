@@ -505,5 +505,76 @@ int main(){
                 free(output);
 }
 
+// ASS_3.1
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
 
+#define WIDTH 1920
+#define HEIGHT 1080
+#define BIT_DEPTH 2
+#define FILE_NAME 256
+
+int main()
+{
+    size_t F_SIZE = (((WIDTH*HEIGHT)*BIT_DEPTH)*2);
+	int TF=46;
+	size_t TF_SIZE = F_SIZE*TF;
+
+	
+	FILE *fp=fopen("5052_1920x1080_UYVY_12b (1).yuv","rb");
+	
+	for(int i=0; i<TF; i++)
+	{
+		char output_file[FILE_NAME];
+		sprintf(output_file,"1920x1080_UYVY_10bframe_(%d).yuv",i+1);
+		FILE *frame=fopen(output_file,"wb");
+		if(frame == NULL)
+			{
+				printf("Error");
+				fclose(frame);
+				return 1;
+			}
+		size_t TP=F_SIZE/2;
+		uint8_t *input = malloc(F_SIZE*sizeof(uint8_t));
+// 		if (NULL == input) {
+// 			printf("Error Input Memmory Allocation");
+// 		}
+
+		uint16_t *output = malloc(F_SIZE*sizeof(uint16_t));
+// 		if (output == NULL) {
+// 			printf("Error Output Memmory Allocation");
+// 			}
+
+		fread(input,sizeof(uint8_t),F_SIZE,fp);
+
+		size_t input_index=0;
+		size_t output_index=0;
+		size_t pixels = (TP / 2);
+		uint16_t pixel_a = 0;
+		int j = 0;
+		uint16_t ten_bits = 0;
+
+		for (size_t k=0; k < pixels; k++) {
+			pixel_a = 0;
+			for (j = 0; j < 2; j++) {
+				pixel_a = pixel_a | ((uint16_t)input[input_index++] << (8 * j));
+			}
+
+			ten_bits = (pixel_a >> 2) & 0xFFF;
+			output[output_index++] = ten_bits;
+		}
+
+		
+		fwrite(output, sizeof(uint16_t), F_SIZE, frame);
+		
+		
+	}
+	
+	
+	fclose(fp);
+	return 0;
+}
+					
+			
 			
