@@ -674,7 +674,98 @@ int main() {
 
     return 0;
 }
+// edited file
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
 
+#define FRAME_WIDTH 1920
+#define FRAME_HEIGHT 1080
+#define BIT_DEPTH 1.25
+
+int main() {
+    FILE *input_fp = fopen("1.raw", "rb");
+    if (input_fp == NULL) {
+        printf("Error opening input file");
+        return 1;
+    }
+
+    // Calculate the size of each frame based on width, height, and bit depth
+    size_t frame_size = (size_t)(FRAME_WIDTH * FRAME_HEIGHT * BIT_DEPTH / 8) * 2;
+
+    // Allocate memory to store the original data
+    uint8_t *original_data = (uint8_t *)malloc(frame_size);
+    if (original_data == NULL) {
+        printf("Error allocating memory");
+        fclose(input_fp);
+        return 1;
+    }
+
+    // Read the first frame from the raw file
+    size_t bytes_read = fread(original_data, 1, frame_size, input_fp);
+    if (bytes_read != frame_size) {
+        printf("Error reading file");
+        fclose(input_fp);
+        free(original_data);
+        return 1;
+    }
+
+    // Close the input file
+    fclose(input_fp);
+
+    // Calculate the size of each component
+    size_t size_Y = (size_t)(FRAME_WIDTH * FRAME_HEIGHT * BIT_DEPTH / 8);
+    size_t size_UV = size_Y / 2;
+
+    // Allocate memory for Y, U, V components
+    uint8_t *Y_component = (uint8_t *)malloc(size_Y);
+    uint8_t *UV_component = (uint8_t *)malloc(size_UV);
+    if (Y_component == NULL || UV_component == NULL) {
+        printf("Error allocating memory");
+        free(original_data);
+        return 1;
+    }
+
+    // Extract Y component
+    memcpy(Y_component, original_data, size_Y);
+
+    // Extract UV component (U and V interleaved)
+    uint8_t *source_uv = original_data + size_Y;
+    for (size_t i = 0; i < size_UV; i++) {
+        UV_component[i] = source_uv[i * 2];
+    }
+
+    // Save Y component to file
+    FILE *Y_fp = fopen("Y_component.raw", "wb");
+    if (Y_fp == NULL) {
+        printf("Error opening output file for Y component");
+        free(original_data);
+        free(Y_component);
+        free(UV_component);
+        return 1;
+    }
+    fwrite(Y_component, 1, size_Y, Y_fp);
+    fclose(Y_fp);
+
+    // Save UV component to file
+    FILE *UV_fp = fopen("UV_component.raw", "wb");
+    if (UV_fp == NULL) {
+        printf("Error opening output file for UV component");
+        free(original_data);
+        free(Y_component);
+        free(UV_component);
+        return 1;
+    }
+    fwrite(UV_component, 1, size_UV, UV_fp);
+    fclose(UV_fp);
+
+    // Clean up
+    free(original_data);
+    free(Y_component);
+    free(UV_component);
+
+    return 0;
+}
 					
 			
 			
