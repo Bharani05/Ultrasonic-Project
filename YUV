@@ -584,6 +584,35 @@ U need to convert each YUV file to YUV422 10 bit interleaved padded data.
 
 Chroma_Offset	= 2592768 (Starting offset fro UV data)
 Each Row Offset     =  1920
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+
+#define FRAME_WIDTH 1920
+#define FRAME_HEIGHT 1080
+#define BIT_DEPTH 1.25
+
+
+int main()
+{
+        FILE *fp=fopen("1.raw","rb");
+        if(fp == NULL){
+                printf("Error opening inputfile");
+                return 1;
+        }
+        size_t F_SIZE = (((FRAME_WIDTH * FRAME_HEIGHT) * BIT_DEPTH) * 2);
+        printf("%ld ",F_SIZE);
+
+        uint8_t *output = (uint8_t *) calloc(F_SIZE, sizeof(uint8_t));
+        fseek(fp, 0 ,SEEK_END);
+        printf("%ld ", ftell(fp));
+
+
+
+
+}
+
 					
 			
 			
