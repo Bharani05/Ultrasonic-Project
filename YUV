@@ -793,3 +793,81 @@ This appears to be a simple Makefile for building a kernel module named `hellowo
 
 Overall, this Makefile is used to build a kernel module named `helloworld.o` using the kernel's build system, and it provides targets for building the module (`all`) and cleaning up (`clean`).
 			
+// ASS_5
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+
+#define FRAME_WIDTH 1920
+#define FRAME_HEIGHT 1080
+#define BIT_DEPTH 1.25
+#define SAMPLES 2
+#define FILE_NAME 256
+#define NEW_BIT_DEPTH 2
+#define UV_OFFSET 2592768
+#define ROW_OFFSET 2400
+
+
+int main()
+{
+	FILE *fp=fopen("1.raw","rb");
+
+	fseek(fp, 0, SEEK_END);
+        uint32_t FILE_SIZE = ftell(fp);
+        rewind(fp);
+
+	uint32_t NEW_FILE_SIZE = (((FRAME_WIDTH * FRAME_HEIGHT) * NEW_BIT_DEPTH) * SAMPLES);
+        
+
+	char output_file[FILE_NAME] = "1.yuv";
+
+	FILE *frame1 = fopen(output_file,"wb");
+	
+	
+	uint8_t *input = calloc(FILE_SIZE, sizeof(uint8_t));
+
+	fread(input, sizeof(uint8_t),FILE_SIZE,fp);
+
+	uint8_t *input0 = input;
+	uint8_t *input1 = input;
+	uint8_t *output = input0;
+	input1 = input1 + UV_OFFSET;
+	uint8_t *output_1 = input1;
+
+	uint16_t buffer[NEW_FILE_SIZE / 2];
+	uint32_t row_index = 0, index = 0, col_index = 0;
+
+	while(col_index<FRAME_HEIGHT){
+		row_index = 0;
+		while(row_index < (FRAME_WIDTH * BIT_DEPTH)){
+			buffer[index] = ((((*output_1) << 8) | (*(output_1 + 1))) & 0XFFC0) >> 6;
+			buffer[index + 1] = ((((*output) << 8) | (*(output + 1))) & 0XFFC0) >> 6;
+			buffer[index + 2] = ((((*(output_1 + 1) << 8) | (*(output_1 + 2))) << 2) & 0XFFC0) >> 6;
+			buffer[index + 3] = ((((*(output + 1) << 8) | (*(output + 2))) << 2)& 0XFFC0) >> 6;
+			buffer[index + 4] = ((((*(output_1 + 2) << 8) | (*(output_1 + 3))) << 4) & 0XFFC0) >> 6;
+			buffer[index + 5] = ((((*(output + 2) << 8) | (*(output + 3))) << 4) & 0XFFC0) >> 6;
+			buffer[index + 6] = ((((*(output_1 + 3) << 8) | (*(output_1 + 4))) << 6) & 0XFFC0) >> 6;
+			buffer[index + 7] = ((((*(output + 3) << 8) | (*(output + 4))) << 6) & 0XFFC0) >> 6;
+
+			row_index = row_index + 5;
+			index = index + 8;
+			output = output + 5;
+			output_1 = output_1 + 5;
+
+			if(row_index == (FRAME_WIDTH * BIT_DEPTH)){
+					output = input0 + ROW_OFFSET;
+					input = input0 + ROW_OFFSET;
+
+					output_1 = input1 + ROW_OFFSET;
+					input1 = input1 + ROW_OFFSET;
+			}
+		}
+		col_index++;
+	}
+	fwrite(buffer, sizeof(uint16_t), NEW_FILE_SIZE / 2, frame1);
+	free(input);
+	fclose(frame1);
+	fclose(fp);
+
+	return 0;
+}
