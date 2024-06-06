@@ -871,3 +871,19 @@ int main()
 
 	return 0;
 }
+
+//.am file
+
+# Makefile.am
+
+# Name of the final executable
+bin_PROGRAMS = my_program
+
+# List of source files
+my_program_SOURCES = main.c add.c hello.c
+
+# Compiler flags
+AM_CFLAGS = -Wall
+
+# Linker flags
+my_program_LDADD = -lm
