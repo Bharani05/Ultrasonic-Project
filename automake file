@@ -61,3 +61,8 @@ hello_SOURCES = hello.c
 error
 autoreconf: error: automake failed with exit status: 1
 
+eror 2
+Prototype after '@' for main::list_compare : address@hidden@ at /usr/bin/aclocal line 162.
+Illegal character in prototype for main::list_compare : address@hidden@ at /usr/bin/aclocal line 162.
+Prototype mismatch: sub main::list_compare (address@hidden@) vs (\@\@) at /usr/bin/aclocal line 340.
+
