@@ -6,3 +6,28 @@ Prototype mismatch: sub main::list_compare (address@hidden@) vs (\@\@) at /usr/b
 /usr/bin/m4:configure.ac:1: ERROR: end of file in string
 autom4te: error: /usr/bin/m4 failed with exit status: 1
 aclocal: autom4te failed with exit status: 1
+
+
+vim makefile.am
+bin_PROGRAMS = helloworld
+helloworld_SOURCES = hello.c
+
+clean-local:
+        @rm config.status configure config.log
+        @rm Makefile
+        @rm -r autom4te.cache/
+        @rm aclocal.m4
+        @rm compile install-sh missing Makefile.in
+
+vim configure.ac
+
+AC_INIT([helloworld, [0.1], [bharani.vidyaakar@lgepartner.com])
+
+AM_INIT_AUTOMAKE
+
+AC_PROG_CC
+
+AC_CONFIG_FILES([Makefile])
+
+AC_OUTPUT
+
