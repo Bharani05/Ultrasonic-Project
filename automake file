@@ -57,3 +57,7 @@ makefile.am
 
 bin_PROGRAMS = hello
 hello_SOURCES = hello.c
+
+error
+autoreconf: error: automake failed with exit status: 1
+
