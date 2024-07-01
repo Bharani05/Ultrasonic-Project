@@ -31,3 +31,23 @@ AC_CONFIG_FILES([Makefile])
 
 AC_OUTPUT
 
+conf.ac
+
+# Initialize autoconf
+AC_INIT([hello], [1.0], [your-email@example.com])
+AM_INIT_AUTOMAKE
+
+# Checks for programs
+AC_PROG_CC
+
+# Checks for libraries
+
+# Checks for header files
+
+# Checks for typedefs, structures, and compiler characteristics
+
+# Checks for library functions
+
+# Output files
+AC_CONFIG_FILES([Makefile])
+AC_OUTPUT
