@@ -1,0 +1,8 @@
+automake file
+
+Prototype after '@' for main::list_compare : address@hidden@ at /usr/bin/aclocal line 162.
+Illegal character in prototype for main::list_compare : address@hidden@ at /usr/bin/aclocal line 162.
+Prototype mismatch: sub main::list_compare (address@hidden@) vs (\@\@) at /usr/bin/aclocal line 340.
+/usr/bin/m4:configure.ac:1: ERROR: end of file in string
+autom4te: error: /usr/bin/m4 failed with exit status: 1
+aclocal: autom4te failed with exit status: 1
