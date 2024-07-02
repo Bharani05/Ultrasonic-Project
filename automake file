@@ -66,3 +66,26 @@ Prototype after '@' for main::list_compare : address@hidden@ at /usr/bin/aclocal
 Illegal character in prototype for main::list_compare : address@hidden@ at /usr/bin/aclocal line 162.
 Prototype mismatch: sub main::list_compare (address@hidden@) vs (\@\@) at /usr/bin/aclocal line 340.
 
+
+Makefile.in
+
+# Makefile.in for hello world program
+
+# Variables
+CC = @CC@
+CFLAGS = @CFLAGS@
+LDFLAGS = @LDFLAGS@
+TARGET = hello
+
+# Targets
+all: $(TARGET)
+
+$(TARGET): hello.o
+    $(CC) $(LDFLAGS) -o $(TARGET) hello.o
+
+hello.o: hello.c
+    $(CC) $(CFLAGS) -c hello.c
+
+clean:
+    rm -f $(TARGET) hello.o
+
