@@ -60,3 +60,10 @@ link_directories(/path/to/some_library)
 target_link_libraries(hello_cmake PUBLIC some_library)
 
 
+find_library(SOME_LIBRARY_PATH some_library PATHS /custom/path)
+if(SOME_LIBRARY_PATH)
+    target_link_libraries(hello_cmake PUBLIC ${SOME_LIBRARY_PATH})
+else()
+    message(FATAL_ERROR "some_library not found")
+endif()
+
