@@ -1,4 +1,4 @@
-#include<stdio.h>
+ji#include<stdio.h>
 #include<stdlib.h>
 
 struct node
@@ -51,5 +51,7 @@ cmake_minimum_required(VERSION 3.30.0)
 project(hello_cmake)
 
 add_executable(hello_cmake hello_cmake.c)
+
+target_link_libraries(hello_cmake PUBLIC some_library)
 
 
