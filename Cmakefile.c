@@ -54,4 +54,7 @@ add_executable(hello_cmake hello_cmake.c)
 
 target_link_libraries(hello_cmake PUBLIC some_library)
 
+ cannot find -lsome_library: No such file or directory
+
+
 
