@@ -44,3 +44,12 @@ int main()
          printlist(head);
          return 0;
 }
+
+CMakeLists.txt
+cmake_minimum_required(VERSION 3.30.0)
+
+project(hello_cmake)
+
+add_executable(hello_cmake hello_cmake.c)
+
+
