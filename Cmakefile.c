@@ -67,3 +67,41 @@ else()
     message(FATAL_ERROR "some_library not found")
 endif()
 
+
+./cmake/src/CMakeLists.txt
+cmake_minimum_required(VERSION 3.30.0)
+
+project(hello)
+
+add_library(simplecmake printhello.c)
+
+target_include_directories(simplecmake PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../include)
+
+ ./cmake/example/CMakeLists.txt
+project(hello)
+
+add_executable(link link.c)
+
+target_link_libraries(link PRIVATE simplecmake)
+
+./cmake/CMakeLists.txt
+
+cmake_minimum_required(VERSION 3.30.0)
+
+project(helo)
+
+
+add_subdirectory(include)
+add_subdirectory(src)
+add_subdirectory(example)
+
+option(BUILD_EXAMPLES "wheather or not build examples" ON)
+
+if(BUILD_EXAMPLE)
+        message(STATUS "Building example! ...")
+        add_subdirectory(example)
+
+endif()
+
+
+
