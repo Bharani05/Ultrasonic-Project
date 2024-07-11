@@ -51,3 +51,65 @@ Sample Output
 Explanation
 
 The subarrays of array a = [3 3 9 9 5] and their respective sums modulo m=7 
+
+sol
+
+#include <stdio.h>
+#include <limits.h>
+
+// Function to calculate maximum of two integers
+long max(long a, long b) {
+    return (a > b) ? a : b;
+}
+
+// Function to find maximum subarray sum modulo m
+long maximumSum(int n, long a[], long m) {
+    long max_sum_mod = 0;
+    long prefix_sum = 0;
+    long prefix_set[1000000]; // Assuming a large enough size for the prefix set
+    int prefix_count = 0;
+
+    for (int i = 0; i < n; i++) {
+        prefix_sum = (prefix_sum + a[i]) % m;
+        max_sum_mod = max(max_sum_mod, prefix_sum);
+
+        // Store prefix_sum in the prefix_set array
+        prefix_set[prefix_count++] = prefix_sum;
+
+        // Find the smallest prefix sum greater than current prefix_sum % m
+        long smallest_greater = LONG_MAX;
+        for (int j = 0; j < prefix_count - 1; j++) {
+            if (prefix_set[j] > prefix_sum) {
+                smallest_greater = prefix_set[j];
+                break;
+            }
+        }
+
+        if (smallest_greater != LONG_MAX) {
+            max_sum_mod = max(max_sum_mod, (prefix_sum - smallest_greater + m) % m);
+        }
+    }
+
+    return max_sum_mod;
+}
+
+int main() {
+    int q;
+    scanf("%d", &q);
+
+    while (q--) {
+        int n;
+        long m;
+        scanf("%d %ld", &n, &m);
+
+        long a[n];
+        for (int i = 0; i < n; i++) {
+            scanf("%ld", &a[i]);
+        }
+
+        long result = maximumSum(n, a, m);
+        printf("%ld\n", result);
+    }
+
+    return 0;
+}
