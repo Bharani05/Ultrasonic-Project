@@ -108,4 +108,6 @@ error: pathspec 'v4.4.0' did not match any file(s) known to git
 git ls-remote --tags origin
 git ls-remote --heads origin
 
+fatal: remote error: access denied or repository not exported: /pub/scm/linux/kernel/git/stable/linux.git
+
 
