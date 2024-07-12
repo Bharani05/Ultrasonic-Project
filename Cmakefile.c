@@ -113,3 +113,8 @@ fatal: remote error: access denied or repository not exported: /pub/scm/linux/ke
 git tag v4.4.0
 git push origin v4.4.0
 
+wget https://www.kernel.org/pub/linux/kernel/v4.x/linux-4.4.0.tar.xz
+
+curl -O https://www.kernel.org/pub/linux/kernel/v4.x/linux-4.4.0.tar.xz
+
+tar -xf linux-4.4.0.tar.xz
