@@ -103,5 +103,7 @@ if(BUILD_EXAMPLE)
 
 endif()
 
+error: pathspec 'v4.4.0' did not match any file(s) known to git
+
 
 
