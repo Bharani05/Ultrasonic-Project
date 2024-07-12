@@ -105,5 +105,7 @@ endif()
 
 error: pathspec 'v4.4.0' did not match any file(s) known to git
 
+git ls-remote --tags origin
+git ls-remote --heads origin
 
 
