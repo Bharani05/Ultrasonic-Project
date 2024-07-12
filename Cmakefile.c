@@ -118,3 +118,10 @@ wget https://www.kernel.org/pub/linux/kernel/v4.x/linux-4.4.0.tar.xz
 curl -O https://www.kernel.org/pub/linux/kernel/v4.x/linux-4.4.0.tar.xz
 
 tar -xf linux-4.4.0.tar.xz
+
+--2024-07-12 10:50:01--  https://www.kernel.org/pub/linux/kernel/v4.x/linux-4.4.0.tar.xz
+Resolving www.kernel.org (www.kernel.org)... 145.40.73.55, 2604:1380:40e1:4800::1
+Connecting to www.kernel.org (www.kernel.org)|145.40.73.55|:443... connected.
+ERROR: cannot verify www.kernel.org's certificate, issued by ‘CN=LGE.com,OU=LG,O=LG,L=Mapo-gu,ST=Seoul,C=KR’:
+  Unable to locally verify the issuer's authority.
+To connect to www.kernel.org insecurely, use `--no-check-certificate'.
