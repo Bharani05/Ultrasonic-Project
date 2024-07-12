@@ -110,4 +110,6 @@ git ls-remote --heads origin
 
 fatal: remote error: access denied or repository not exported: /pub/scm/linux/kernel/git/stable/linux.git
 
+git tag v4.4.0
+git push origin v4.4.0
 
