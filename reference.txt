@@ -95,3 +95,29 @@ This command specifies that the `hello_cmake` target should link against a libra
 - Include comments to clarify each step for future reference or for other developers who may work on the project.
 
 This setup provides a straightforward structure for compiling a simple C application with CMake while handling external dependencies effectively.
+
+Here's an explanation of the updated `target_link_libraries` command:
+
+### Command Breakdown
+```cmake
+target_link_libraries(hello_cmake PRIVATE simplecmake)
+```
+
+### 1. Linking Libraries
+This command specifies that the `hello_cmake` target should link against the library named `simplecmake`.
+
+### 2. Visibility Specifier: PRIVATE
+- **`PRIVATE`**: This keyword indicates the visibility of the `simplecmake` library:
+  - The `hello_cmake` target will link against `simplecmake`, meaning it can use its functions and classes during compilation and linking.
+  - However, **any targets that link to `hello_cmake` will not inherit the link to `simplecmake`**. This is useful for encapsulating dependencies that are only relevant to the implementation of `hello_cmake` itself and should not be exposed to other targets that depend on it.
+
+### Use Case
+Using `PRIVATE` is beneficial when you want to limit the scope of dependencies. For example, if `simplecmake` provides functionality that is only necessary for `hello_cmake` and not for other components that might link to `hello_cmake`, this keeps the build environment cleaner and reduces unnecessary dependencies for other targets.
+
+### Summary
+- The command links the `hello_cmake` executable to the `simplecmake` library.
+- The `PRIVATE` visibility specifier ensures that only `hello_cmake` knows about `simplecmake`, preventing other targets from being affected by this dependency.
+
+### Recommendations
+- Make sure that `simplecmake` is correctly defined and available in your CMake configuration, either by using `find_package` or defining it elsewhere in your project.
+- Consider using other visibility specifiers like `PUBLIC` or `INTERFACE` depending on how you want to manage dependencies in larger projects.
