@@ -49,3 +49,49 @@ Here, there's a conditional check to see if `BUILD_EXAMPLE` is true. However, th
 - Consider adding more comments for clarity, especially for users unfamiliar with CMake.
 
 With these adjustments, the configuration will function correctly and provide a clear and flexible build process for users.
+
+Here's a detailed explanation of the provided CMake configuration for the project `hello_cmake`:
+
+### 1. CMake Minimum Version
+```cmake
+cmake_minimum_required(VERSION 3.30.0)
+```
+This line specifies that the minimum required version of CMake for this project is 3.30.0. If a user attempts to run this CMake file with an older version, an error will occur, and the configuration will stop.
+
+### 2. Project Declaration
+```cmake
+project(hello_cmake)
+```
+This command declares the project name as `hello_cmake`. It also initializes several CMake variables such as:
+- `PROJECT_NAME`: The name of the project.
+- `PROJECT_SOURCE_DIR`: The directory where the source files are located.
+
+### 3. Adding an Executable
+```cmake
+add_executable(hello_cmake hello_cmake.c)
+```
+This line creates an executable target named `hello_cmake`. The source file for this executable is `hello_cmake.c`. 
+
+- **Executable Creation**: `add_executable` tells CMake to compile the specified source files into an executable. In this case, it will compile `hello_cmake.c` into an executable named `hello_cmake`.
+
+### 4. Linking Libraries
+```cmake
+target_link_libraries(hello_cmake PUBLIC some_library)
+```
+This command specifies that the `hello_cmake` target should link against a library called `some_library`. 
+
+- **Linking**: The `target_link_libraries` command is used to link libraries to a target. In this case:
+  - **`PUBLIC`**: This keyword specifies the visibility of the library. If a library is marked as `PUBLIC`, it means that:
+    - The target `hello_cmake` will link against `some_library`.
+    - Any targets that link to `hello_cmake` will also link against `some_library`. This is useful for managing dependencies in a more modular way.
+
+### Summary
+- The CMake configuration sets up a project named `hello_cmake`.
+- It creates an executable from the source file `hello_cmake.c`.
+- It links the executable with `some_library`, ensuring that any target dependent on `hello_cmake` also knows about `some_library`.
+
+### Recommendations
+- Ensure that `some_library` is properly defined and available in the CMake project. If it’s an external library, you may need to find and include it with commands like `find_package`.
+- Include comments to clarify each step for future reference or for other developers who may work on the project.
+
+This setup provides a straightforward structure for compiling a simple C application with CMake while handling external dependencies effectively.
