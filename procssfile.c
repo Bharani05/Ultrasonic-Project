@@ -80,3 +80,47 @@ static void __exit my_exit(void)
 
 module_init(my_init);
 module_exit(my_exit);
+
+
+// arch/x86/kernel/cpu/proc.c
+#include <linux/module.h>
+#include <linux/proc_fs.h>
+#include <linux/seq_file.h>
+#include <asm/cpu_device_id.h>
+
+static int cpuinfo_proc_show(struct seq_file *m, void *v) {
+    // Example information; real implementation queries hardware
+    seq_printf(m, "processor       : %d\n", smp_processor_id());
+    seq_printf(m, "vendor_id       : %s\n", "GenuineIntel");
+    seq_printf(m, "cpu family      : %d\n", 6);
+    seq_printf(m, "model           : %d\n", 158);
+    seq_printf(m, "model name      : Intel(R) Core(TM) i7-8550U CPU @ 1.80GHz\n");
+    seq_printf(m, "cpu MHz         : %lu\n", 1992);
+    seq_printf(m, "cache size      : %d KB\n", 8192);
+    // Add more fields as necessary
+    return 0;
+}
+
+static int cpuinfo_proc_open(struct inode *inode, struct file *file) {
+    return single_open(file, cpuinfo_proc_show, NULL);
+}
+
+static const struct file_operations cpuinfo_proc_fops = {
+    .owner   = THIS_MODULE,
+    .open    = cpuinfo_proc_open,
+    .read    = seq_read,
+    .release = single_release,
+};
+
+void cpuinfo_proc_init(void) {
+    proc_create("cpuinfo", 0, NULL, &cpuinfo_proc_fops);
+}
+
+void cpuinfo_proc_exit(void) {
+    remove_proc_entry("cpuinfo", NULL);
+}
+
+module_init(cpuinfo_proc_init);
+module_exit(cpuinfo_proc_exit);
+
+MODULE_LICENSE("GPL");
