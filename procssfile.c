@@ -124,3 +124,7 @@ module_init(cpuinfo_proc_init);
 module_exit(cpuinfo_proc_exit);
 
 MODULE_LICENSE("GPL");
+
+fatal error: asm/cpu_device_id.h: No such file or directory
+    4 | #include <asm/cpu_device_id.h>
+
