@@ -89,3 +89,40 @@ hello.o: hello.c
 clean:
     rm -f $(TARGET) hello.o
 
+//makefile contents
+
+Let's break down the Makefile line by line:
+
+obj-m += procfs_test.o
+
+This line tells the make system that we want to build a kernel module object file called procfs_test.o. The obj-m variable is a special variable in the kernel build system that specifies the object files that should be built as kernel modules.
+
+In this case, we're telling make to build an object file called procfs_test.o from the procfs_test.c source file. The .o suffix indicates that we want to build an object file, which is an intermediate file that contains machine-specific, compiled code.
+
+all:
+
+This line specifies the default target for the make system. In other words, when we run make without specifying a target, it will build the all target by default.
+
+make -C /path/to/kernel/source M=$(pwd) modules
+
+This line is the command that builds the kernel module. Let's break it down:
+
+make -C /path/to/kernel/source: This tells make to change to the directory specified by /path/to/kernel/source and run the make command from there. This is necessary because the kernel build system is located in the kernel source code directory.
+M=$(pwd): This sets the M variable to the current working directory (i.e., the directory where the Makefile is located). The M variable tells the kernel build system where to find the source files for the kernel module.
+modules: This is the target that we want to build. In this case, we're telling make to build the kernel module.
+When we run make, it will execute this command, which will build the kernel module using the kernel build system.
+
+clean:
+
+This line specifies a target for cleaning up the build directory. When we run make clean, it will execute the command specified here.
+
+make -C /path/to/kernel/source M=$(pwd) clean
+
+This command is similar to the previous one, but it tells make to clean up the build directory instead of building the kernel module. The clean target is a special target in the kernel build system that removes all the object files and other temporary files generated during the build process.
+
+By including this clean target in our Makefile, we can easily clean up the build directory by running make clean. This is useful when we want to rebuild the kernel module from scratch or when we want to remove any leftover files from a previous build.
+
+
+
+
+
