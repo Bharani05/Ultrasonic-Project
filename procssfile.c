@@ -221,3 +221,11 @@ static void __exit my_exit(void)
 
 module_init(my_init);
 module_exit(my_exit);
+//error
+ error: storage size of ‘sysinfo’ isn’t known
+   22 |     struct utsname sysinfo;
+      |                    ^~~~~~~
+/home/lg-bharani/drivers/bharani/procfile.c:29:5: error: implicit declaration of function ‘uname’; did you mean ‘utsname’? [-Werror=implicit-function-declaration]
+   29 |     uname(&sysinfo); // Get system information
+      |     ^~~~~
+
