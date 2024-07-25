@@ -474,3 +474,19 @@ static void __exit my_exit(void)
 
 module_init(my_init);
 module_exit(my_exit);
+
+// error
+implicit declaration of function ‘sget_fs’; did you mean ‘sget_fc’? [-Werror=implicit-function-declaration]
+   44 |     oldfs = sget_fs();
+      |             ^~~~~~~
+      |             sget_fc
+/home/lg-bharani/drivers/bharani/procfile.c:44:13: error: incompatible types when assigning to type ‘mm_segment_t’ from type ‘int’
+/home/lg-bharani/drivers/bharani/procfile.c:45:5: error: implicit declaration of function ‘set_fs’; did you mean ‘sget_fc’? [-Werror=implicit-function-declaration]
+   45 |     set_fs(KERNEL_DS);
+      |     ^~~~~~
+      |     sget_fc
+/home/lg-bharani/drivers/bharani/procfile.c:45:12: error: ‘KERNEL_DS’ undeclared (first use in this function); did you mean ‘KERNFS_NS’?
+   45 |     set_fs(KERNEL_DS);
+      |            ^~~~~~~~~
+      |            KERNFS_NS
+
