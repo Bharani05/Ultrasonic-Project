@@ -602,3 +602,6 @@ static void __exit my_exit(void)
 
 module_init(my_init);
 module_exit(my_exit);
+// error 
+ cannot create /home/lg-bharani/drivers/bharani/.procfile.o.cmd: Permission denied
+
