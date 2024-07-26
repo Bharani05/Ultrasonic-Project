@@ -913,3 +913,7 @@ static void __exit my_exit(void)
 
 module_init(my_init);
 module_exit(my_exit);
+
+
+could not insert module processentry.ko: Cannot allocate memory
+
