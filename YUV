@@ -913,5 +913,213 @@ Professional Video Production: RGB is sometimes used in professional video produ
 In summary, YUV is preferred over RGB in many applications due to its efficient compression, transmission, and storage characteristics, as well as its ability to separate luminance and chrominance, which allows for more precise control over color reproduction. However, RGB is still used in situations where high color accuracy and precise color control are required.
 
 
+//sep.c
 
+Certainly! Let’s break down the code in detail, explaining each part step-by-step.
+
+Code Breakdown
+1. Include Headers
+c
+Copy code
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+<stdio.h>: Provides functions for input and output, such as fopen, fread, fwrite, and printf.
+<stdint.h>: Defines fixed-width integer types, such as uint16_t for 16-bit unsigned integers.
+<stdlib.h>: Provides functions for memory allocation, process control, and conversions.
+2. Main Function and Command-Line Arguments
+c
+Copy code
+int main(int argc, char *argv[]) {
+int argc: The count of command-line arguments passed to the program.
+char *argv[]: An array of strings representing the command-line arguments.
+c
+Copy code
+if (argc != 5) {
+    printf("Usage: %s <input_file> <y_output_file> <u_output_file> <v_output_file>\n", argv[0]);
+    return 1;
+}
+Check Argument Count: Ensures that exactly 4 arguments are provided (plus the program name). If not, it prints usage instructions and exits with a status of 1, indicating an error.
+3. Parsing Command-Line Arguments
+c
+Copy code
+char *inputFileName = argv[1];
+char *yOutputFileName = argv[2];
+char *uOutputFileName = argv[3];
+char *vOutputFileName = argv[4];
+Arguments Extraction: Assigns the provided command-line arguments to variables for easier use. These represent the file paths for the input file and the output files for Y, U, and V components.
+4. File Operations
+c
+Copy code
+FILE *inputFile = fopen(inputFileName, "rb");
+if (inputFile == NULL) {
+    perror("Error opening input file");
+    return 1;
+}
+Open Input File: Opens the input file in binary read mode ("rb"). If the file cannot be opened, it prints an error message and exits.
+c
+Copy code
+FILE *fpY = fopen(yOutputFileName, "wb");
+FILE *fpU = fopen(uOutputFileName, "wb");
+FILE *fpV = fopen(vOutputFileName, "wb");
+if (fpY == NULL || fpU == NULL || fpV == NULL) {
+    perror("Error opening output files");
+    fclose(inputFile);
+    if (fpY) fclose(fpY);
+    if (fpU) fclose(fpU);
+    if (fpV) fclose(fpV);
+    return 1;
+}
+Open Output Files: Opens the files for the Y, U, and V components in binary write mode ("wb"). If any of the files cannot be opened, it prints an error message and ensures any successfully opened files are closed before exiting.
+5. Processing Data
+c
+Copy code
+uint16_t buffer[4];
+uint16_t U, V, Y, Y1;
+Buffer and Variables: Defines a buffer for reading 4 uint16_t values and variables to store the Y, U, V, and Y1 components.
+c
+Copy code
+while (fread(buffer, sizeof(uint16_t), 4, inputFile)) {
+    U  = buffer[0];
+    Y  = buffer[1];
+    V  = buffer[2];
+    Y1 = buffer[3];
+Reading Data: Reads 4 uint16_t values from the input file into the buffer. The loop continues as long as fread successfully reads data.
+c
+Copy code
+    fwrite(&Y, sizeof(uint16_t), 1, fpY);
+    fwrite(&U, sizeof(uint16_t), 1, fpU);
+    fwrite(&V, sizeof(uint16_t), 1, fpV);
+    fwrite(&Y1, sizeof(uint16_t), 1, fpY);
+}
+Writing Data: Writes the Y, U, V, and Y1 values to their respective output files. Each fwrite call writes one uint16_t value to the corresponding file.
+6. Closing Files
+c
+Copy code
+fclose(inputFile);
+fclose(fpY);
+fclose(fpU);
+fclose(fpV);
+Close Files: Closes all the opened files to free resources. This is essential to ensure that all data is properly written and files are properly closed.
+7. Return Statement
+c
+Copy code
+return 0;
+Exit Status: Returns 0 to indicate that the program executed successfully.
+Summary
+Command-Line Arguments: Allow users to specify input and output file paths when running the program. This adds flexibility and avoids hardcoding file names.
+File Handling: Properly opens and closes files, with error handling for cases where files cannot be opened.
+Data Processing: Reads data from the input file in chunks, processes it, and writes the components (Y, U, V) to separate files.
+Error Handling: Includes checks and messages to handle potential issues with file operations.
+This program is designed to process a YUV file by separating it into individual Y, U, and V components, and it uses command-line arguments to make it adaptable to different input and output file paths.
+//ASS_4
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+
+#define FRAME_WIDTH 1920
+#define FRAME_HEIGHT 1080
+#define BIT_DEPTH 2
+#define FILE_NAME 50
+
+
+int main(){
+		
+	FILE *fp = fopen("5330_TestSet_BL_decoder_out_1920x1080_420_10b.yuv", "rb");
+	if (fp == NULL) {
+		printf("Error opening input file.\n");
+			return 0;
+	}
+	
+	
+		int frameSize = (((FRAME_WIDTH * FRAME_HEIGHT) * BIT_DEPTH) * 1.5);
+		
+	
+	
+		uint8_t *output = (uint8_t *) calloc(frameSize, sizeof(uint8_t));// here i allocates a buffer for framesize that is pointed to the outpit side.
+	
+		int frameCount = 0;// inititalize the frame count = 0.
+		fseek (fp, 0, SEEK_END); // moves the file pointer to the end of the file.
+		//printf("%ld ", ftell(fp));// 
+		
+		int i;// initialize the integer varriable for loop purpose initialy it is 0.
+		int vals=ftell(fp); // get the current position of the file pointer, which size of the file pointer in bytes.
+		printf("%d ",vals);// print the size of the file.
+		int val = (vals/frameSize);// to get the one frame size that size is stored in val.
+		printf("%d ",val);// print the no.of file.
+		rewind(fp);//Go back to the begining of the file.
+		
+		
+		
+		for(i=0; i < val; i++){ 		
+		fread(output,  frameSize,1, fp);//reads the frame size of the file and store in the output buffer.
+		char outputFilename[FILE_NAME];// declare the charecter array stores the output file name.
+		sprintf(outputFilename,  "1920x1080_420_10b_(%d).yuv", frameCount);//formate the outputfile with the frame count.
+	
+		FILE *outputFile = fopen(outputFilename, "wb");//open the output file with the generated file name.
+		if (outputFile == NULL){
+			printf("Error Openning OutputFile");
+	
+			return 1;
+		}
+		fwrite(output,  frameSize,1, outputFile);// write the frame data to the output file.
+		fclose(outputFile);
+		frameCount++;
+		
+		}
+		free(output);
+}
+	
+
+//sep.c
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+
+#define resolution ((1920*1080)*2)
+
+int main() {
+    
+    FILE *inputFile = fopen("1920x1080_420_10b_(45).yuv", "rb");
+    if (inputFile == NULL) {
+        printf("Error opening input file.\n");
+        return 0;
+    }
+    
+   
+    FILE *fp = fopen("Y_component.yuv","wb");
+    FILE *fp1 = fopen("U_component.yuv", "wb");
+    FILE *fp2 = fopen("V_component.yuv", "wb");
+    uint8_t *buff  = calloc(resolution,1);
+    
+    fread(buff, resolution,1,inputFile);
+    
+    fwrite(buff, resolution, 1, fp);
+    
+    uint16_t buffer[2];
+    uint16_t U,V;
+    
+    while(fread(&buffer, sizeof(uint16_t), 2,inputFile))
+    {
+       U  = buffer[0];
+	
+      
+        
+       V  = buffer[1];
+       
+    
+    
+        
+        fwrite(&U, sizeof(uint16_t), 1, fp1);
+        fwrite(&V, sizeof(uint16_t), 1, fp2);
+       
+    }
+    free(buff);
+    fclose(inputFile);
+    fclose(fp);
+    fclose(fp1);
+    fclose(fp2);
+    
+}    
 
