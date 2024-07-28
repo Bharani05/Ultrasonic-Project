@@ -917,3 +917,116 @@ module_exit(my_exit);
 
 could not insert module processentry.ko: Cannot allocate memory
 
+#include <linux/module.h>
+#include <linux/moduleparam.h>
+#include <linux/init.h>
+#include <linux/kernel.h>
+#include <linux/proc_fs.h>
+#include <linux/uaccess.h>
+#include <linux/fs.h>
+#include <linux/slab.h>
+
+#define BUFSIZE  1024  // Buffer size for reading proc data
+
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("Your Name <your.email@example.com>");
+MODULE_DESCRIPTION("Module creates a folder and file in procfs, implements read and write callbacks, and includes personal information");
+
+// Define the buffer for storing data written to the proc file
+static char *data_buffer;
+static struct proc_dir_entry *proc_folder;
+static struct proc_dir_entry *proc_file;
+
+// Define personal information
+static const char *personal_info = "Personal Information:\nName: Your Name\nEmail: your.email@example.com\n";
+
+static ssize_t my_read(struct file *file, char *user_buffer, size_t count, loff_t *offs)
+{
+    ssize_t ret;
+
+    // Check if end of file has been reached
+    if (*offs > 0)
+        return 0;
+
+    // Allocate buffer for reading
+    char *buf = kmalloc(BUFSIZE, GFP_KERNEL);
+    if (!buf)
+        return -ENOMEM;
+
+    // Format the buffer with personal information and proc data
+    ret = snprintf(buf, BUFSIZE - 1, "%s\nData: %s\n", personal_info, data_buffer);
+
+    // Copy the buffer to user space
+    if (copy_to_user(user_buffer, buf, ret)) {
+        kfree(buf);
+        return -EFAULT;
+    }
+
+    kfree(buf);
+    *offs += ret;
+    return ret;
+}
+
+static ssize_t my_write(struct file *file, const char *user_buffer, size_t count, loff_t *offs)
+{
+    int to_copy, not_copied, delta;
+
+    // Prepare buffer for writing
+    memset(data_buffer, 0, BUFSIZE);
+
+    to_copy = min(count, (size_t)(BUFSIZE - 1));
+    not_copied = copy_from_user(data_buffer, user_buffer, to_copy);
+
+    delta = to_copy - not_copied;
+    data_buffer[delta] = '\0'; // Null-terminate the buffer
+
+    printk(KERN_INFO "procfs_test - You have written: %s\n", data_buffer);
+
+    return delta;
+}
+
+static struct proc_ops fops = {
+    .proc_read = my_read,
+    .proc_write = my_write,
+};
+
+static int __init my_init(void)
+{
+    // Allocate buffer
+    data_buffer = kmalloc(BUFSIZE, GFP_KERNEL);
+    if (!data_buffer)
+        return -ENOMEM;
+    
+    // Initialize buffer
+    memset(data_buffer, 0, BUFSIZE);
+
+    // Create proc folder and file
+    proc_folder = proc_mkdir("bharani", NULL);
+    if (!proc_folder) {
+        printk(KERN_ERR "procfs_test - Error creating /proc/bharani\n");
+        return -ENOMEM;
+    }
+
+    proc_file = proc_create("dummy", 0666, proc_folder, &fops);
+    if (!proc_file) {
+        printk(KERN_ERR "procfs_test - Error creating /proc/bharani/dummy\n");
+        proc_remove(proc_folder);
+        kfree(data_buffer);
+        return -ENOMEM;
+    }
+
+    printk(KERN_INFO "procfs_test - Created /proc/bharani/dummy\n");
+    return 0;
+}
+
+static void __exit my_exit(void)
+{
+    printk(KERN_INFO "procfs_test - Removing /proc/bharani/dummy\n");
+    proc_remove(proc_file);
+    proc_remove(proc_folder);
+    kfree(data_buffer);
+}
+
+module_init(my_init);
+module_exit(my_exit);
+
