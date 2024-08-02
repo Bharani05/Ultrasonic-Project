@@ -1029,4 +1029,150 @@ static void __exit my_exit(void)
 
 module_init(my_init);
 module_exit(my_exit);
+//final
+#include <linux/module.h>
+#include <linux/moduleparam.h>
+#include <linux/init.h>
+#include <linux/kernel.h>
+#include <linux/proc_fs.h>
+#include <asm/uaccess.h>
+#include <linux/slab.h>
+#include <linux/kthread.h>
+#include <linux/sched.h>
+#include <linux/delay.h>
+#include <linux/stat.h>
+
+#define BUFSIZE  100
+
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("Bharani<bhrnbala@gmail.com>");
+MODULE_DESCRIPTION("Module creates a folder and file in procfs and implements read and write callbacks and implement the thread function");
+
+static char *data_buffer;//pointer to a buffer to hold a data written to the file in /proc
+static struct proc_dir_entry *proc_folder;//pointer to the /proc directory entry created for the module
+static struct proc_dir_entry *proc_file;//poointer to the /pro file entry inside the /proc directory
+static struct task_struct *procfs_thread;//pointer to the kernel thread structure
+static bool running = true;//boolean flag to control the kernel threadrunning status
+
+static ssize_t my_read(struct file *file, char *user_buffer, size_t count, loff_t *offs)
+{
+    static const char *personal_info = "Personal Information:\nName: Bharani\nEmail: bharani.v@lge.com\n";
+    ssize_t ret;
+    char *buf;
+
+    printk(KERN_INFO "procfs_test - my_read called, offset = %lld\n", *offs);
+
+
+    if (*offs > 0)
+        return 0;
+
+    buf = kmalloc(BUFSIZE, GFP_KERNEL);
+    if (!buf)
+        return -ENOMEM;
+
+    ret = snprintf(buf, BUFSIZE - 1, "%s\nData:%s\n", personal_info, data_buffer);
+
+    if (copy_to_user(user_buffer, buf, ret))
+    {
+        kfree(buf);
+        return -EFAULT;
+    }
+
+    kfree(buf);
+    *offs += ret;
+
+    return ret;
+}
+
+static ssize_t my_write(struct file *file, const char *user_buffer, size_t count, loff_t *offs)
+{
+    int to_copy, not_copied, delta;
+
+    memset(data_buffer, 0, BUFSIZE);
+
+    to_copy = min(count, (size_t)(BUFSIZE - 1));
+
+    not_copied = copy_from_user(data_buffer, user_buffer, to_copy);
+
+    delta = to_copy - not_copied;
+    data_buffer[delta] = '\0';
+
+    printk(KERN_INFO "procfs_test - You have written: %s\n", data_buffer);
+
+    return delta;
+}
+
+static struct proc_ops fops = {
+    .proc_read = my_read,
+    .proc_write = my_write,
+};
+
+static int thread_func(void *data)
+{
+    while (running)
+    {
+        printk(KERN_INFO "procfs_test - Thread running - PID %d\n", current->pid);
+        msleep(1000);
+    }
+    return 0;
+}
+
+static int __init my_init(void)
+{
+    data_buffer = kmalloc(BUFSIZE, GFP_KERNEL);
+    if (!data_buffer)
+        return -ENOMEM;
+
+    memset(data_buffer, 0, BUFSIZE);
+
+    proc_folder = proc_mkdir("bharani", NULL);
+    if (proc_folder == NULL)
+    {
+        printk(KERN_ERR "procfs_test - Error creating /proc/bharani\n");
+        kfree(data_buffer);
+        return -ENOMEM;
+    }
+
+    proc_file = proc_create("dummy", 0666, proc_folder, &fops);
+    if (proc_file == NULL)
+    {
+        printk(KERN_ERR "procfs_test - Error creating /proc/bharani/dummy\n");
+        proc_remove(proc_folder);
+        kfree(data_buffer);
+        return -ENOMEM;
+    }
+    printk(KERN_INFO "procfs_test - Created /proc/bharani/dummy\n");
+
+    procfs_thread = kthread_create(thread_func, NULL, "procfs_thread");
+
+    if (IS_ERR(procfs_thread))
+    {
+        printk(KERN_ERR "procfs_thread creation failed\n");
+        proc_remove(proc_file);
+        proc_remove(proc_folder);
+        kfree(data_buffer);
+        return PTR_ERR(procfs_thread);
+    }
+    wake_up_process(procfs_thread);
+    printk(KERN_INFO "procfs_test - Created /proc/bharani/dummy and started thread\n");
+
+    return 0;
+}
+
+static void __exit my_exit(void)
+{
+    running = false;
+    if (procfs_thread)
+        kthread_stop(procfs_thread);
+
+    proc_remove(proc_file);
+    proc_remove(proc_folder);
+    kfree(data_buffer);
+
+    printk(KERN_INFO "procfs_test - Cleaned up /proc/bharani/dummy\n");
+}
+
+module_init(my_init);
+module_exit(my_exit);
+
 
