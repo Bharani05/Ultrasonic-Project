@@ -1123,3 +1123,157 @@ int main() {
     
 }    
 
+
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define BIT_DEPTH 2
+#define FILE_NAME 256 
+#define SAMPLES 2 
+
+int main(int argc, char *argv[])//this is the entry point of programe argc for argument count argv[] vector array of string.
+{
+    if (argc != 5) { //checks if 5 command line arguments are giving or not 
+        printf(" %s <input_file> <width> <height> <output_file_prefix>\n", argv[0]);
+        return 1;
+    }
+
+    
+    char *input_file = argv[1];//this argument for input file
+
+    int width = atoi(argv[2]);//Converts the width argument from a string to an integer using  atoi
+   // printf("%d \n", width);
+
+    int height = atoi(argv[3]);// Converts the height argument from a string to an integer using atoi
+   // printf("%d \n", height);
+
+
+    char *output_file_prefix = argv[4];//Assigns the output file prefix from the command-line arguments.
+
+    if (width <= 0 || height <= 0) {//Checks if width and height are positive integers. If not, prints an error message and exits with a status of 1.
+
+        printf("Error: Width and height must be positive integers.\n");
+        return 1;
+    }
+
+   
+    uint32_t frame_size = (width * height * BIT_DEPTH * SAMPLES);// Calculate frame size
+
+    
+    FILE *fp = fopen(input_file, "rb"); // Open the input file
+    if (fp == NULL) {
+        perror("Error opening input file");
+        return 1;
+    }
+
+    
+    fseek(fp, 0, SEEK_END);// Get the size of the file and move the flie pointer to the end of file.
+    uint32_t file_size = ftell(fp);//retrive the current file pointer position which file size
+    rewind(fp);//reset the file pointer to the begining.
+
+   
+    int total_frames = file_size / frame_size;// Calculate the total number of frames
+
+    
+    uint8_t *input = calloc(frame_size, sizeof(uint8_t));// Allocate memory for the input buffer
+    if (input == NULL) {
+        perror("Error allocating memory");
+        fclose(fp);
+        return 1;
+    }
+
+    
+    for (int a = 1; a <= total_frames; a++) {// Process each frame
+        char output_file[FILE_NAME];//
+        snprintf(output_file, FILE_NAME, "%s_%d.yuv", output_file_prefix, a);
+
+        FILE *frame = fopen(output_file, "wb");
+        if (frame == NULL) {
+            perror("Error opening output file");
+            free(input);
+            fclose(fp);
+            return 1;
+        }
+
+        fread(input, sizeof(uint8_t), frame_size, fp);
+        uint16_t *output = (uint16_t*)input;
+
+        uint32_t i = 0;
+        while (i < frame_size) {
+            *output = ((*output) >> 2) & 0x3FF;
+            fwrite(output, sizeof(uint16_t), 1, frame);
+            i += 2;
+            output++;
+        }
+
+        fclose(frame);
+	
+    }
+
+    
+    fclose(fp);
+    free(input);
+
+    return 0;
+}
+//extract.c
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+
+#define FRAME_WIDTH 1920
+#define FRAME_HEIGHT 1080
+#define BIT_DEPTH 2
+#define FILE_NAME 50
+
+
+int main(){
+		
+	FILE *fp = fopen("5330_TestSet_BL_decoder_out_1920x1080_420_10b.yuv", "rb");
+	if (fp == NULL) {
+		printf("Error opening input file.\n");
+			return 0;
+	}
+	
+	
+		int frameSize = (((FRAME_WIDTH * FRAME_HEIGHT) * BIT_DEPTH) * 1.5);
+		
+	
+	
+		uint8_t *output = (uint8_t *) calloc(frameSize, sizeof(uint8_t));// here i allocates a buffer for framesize that is pointed to the outpit side.
+	
+		int frameCount = 0;// inititalize the frame count = 0.
+		fseek (fp, 0, SEEK_END); // moves the file pointer to the end of the file.
+		//printf("%ld ", ftell(fp));// 
+		
+		int i;// initialize the integer varriable for loop purpose initialy it is 0.
+		int vals=ftell(fp); // get the current position of the file pointer, which size of the file pointer in bytes.
+		printf("%d ",vals);// print the size of the file.
+		int val = (vals/frameSize);// to get the one frame size that size is stored in val.
+		printf("%d ",val);// print the no.of file.
+		rewind(fp);//Go back to the begining of the file.
+		
+		
+		
+		for(i=0; i < val; i++){ 		
+		fread(output,  frameSize,1, fp);//reads the frame size of the file and store in the output buffer.
+		char outputFilename[FILE_NAME];// declare the charecter array stores the output file name.
+		sprintf(outputFilename,  "1920x1080_420_10b_(%d).yuv", frameCount);//formate the outputfile with the frame count.
+	
+		FILE *outputFile = fopen(outputFilename, "wb");//open the output file with the generated file name.
+		if (outputFile == NULL){
+			printf("Error Openning OutputFile");
+	
+			return 1;
+		}
+		fwrite(output,  frameSize,1, outputFile);// write the frame data to the output file.
+		fclose(outputFile);
+		frameCount++;
+		
+		}
+		free(output);
+}
+	
+
