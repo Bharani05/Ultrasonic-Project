@@ -110,3 +110,128 @@ int main()
                 printf("Thread terminated\n");
         return 0;
 }
+//mutex
+#include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+pthread_mutex_t mutex;
+int shared_data = 0;
+
+void* thread_function(void* arg) {
+    pthread_mutex_lock(&mutex);
+    // Critical section
+    shared_data++;
+    printf("Shared data incremented to: %d\n", shared_data);
+    pthread_mutex_unlock(&mutex);
+    return NULL;
+}
+
+int main() {
+    pthread_t thread1, thread2;
+
+    pthread_mutex_init(&mutex, NULL);
+
+    pthread_create(&thread1, NULL, thread_function, NULL);
+    pthread_create(&thread2, NULL, thread_function, NULL);
+
+    pthread_join(thread1, NULL);
+    pthread_join(thread2, NULL);
+
+    pthread_mutex_destroy(&mutex);
+
+    return 0;
+}
+//mutex_1
+#include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#define NUM_THREADS 5
+
+pthread_mutex_t mutex;
+int shared_counter = 0;
+
+void* increment_counter(void* arg) {
+    for (int i = 0; i < 10000; ++i) {
+        pthread_mutex_lock(&mutex);  // Lock the mutex
+        shared_counter++;            // Critical section
+        pthread_mutex_unlock(&mutex);// Unlock the mutex
+    }
+    return NULL;
+}
+
+int main() {
+    pthread_t threads[NUM_THREADS];
+
+    // Initialize the mutex
+    pthread_mutex_init(&mutex, NULL);
+
+    // Create threads
+    for (int i = 0; i < NUM_THREADS; ++i) {
+        pthread_create(&threads[i], NULL, increment_counter, NULL);
+        printf("created thread id is = %d\n", getpid());
+    }
+
+    // Wait for all threads to finish
+    for (int i = 0; i < NUM_THREADS; ++i) {
+        pthread_join(threads[i], NULL);
+    }
+
+    // Destroy the mutex
+    pthread_mutex_destroy(&mutex);
+
+    printf("Final counter value: %d\n", shared_counter);
+
+    return 0;
+}
+// sync
+#include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+pthread_mutex_t mutex;
+pthread_cond_t cond_var;
+int ready = 0;
+
+void* producer(void* arg) {
+    pthread_mutex_lock(&mutex);
+    ready = 1;  // Set condition
+    printf("Producer: Data is ready.\n");
+    pthread_cond_signal(&cond_var);  // Signal the condition variable
+    pthread_mutex_unlock(&mutex);
+    return NULL;
+}
+
+void* consumer(void* arg) {
+    pthread_mutex_lock(&mutex);
+    while (!ready) {
+        pthread_cond_wait(&cond_var, &mutex);  // Wait for the condition var
+iable
+    }
+    printf("Consumer: Consuming data.\n");
+    pthread_mutex_unlock(&mutex);
+    return NULL;
+}
+
+int main() {
+    pthread_t prod_thread, cons_thread;
+
+    // Initialize mutex and condition variable
+    pthread_mutex_init(&mutex, NULL);
+    pthread_cond_init(&cond_var, NULL);
+
+    // Create producer and consumer threads
+    pthread_create(&prod_thread, NULL, producer, NULL);
+    pthread_create(&cons_thread, NULL, consumer, NULL);
+
+    // Wait for both threads to finish
+    pthread_join(prod_thread, NULL);
+    pthread_join(cons_thread, NULL);
+
+    // Destroy mutex and condition variable
+    pthread_cond_destroy(&cond_var);
+    pthread_mutex_destroy(&mutex);
+
+    return 0;
+}
