@@ -235,3 +235,157 @@ int main() {
 
     return 0;
 }
+//mutex
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+
+pthread_mutex_t lock;
+
+void* thread_function(void* arg) {
+    pthread_mutex_lock(&lock);
+    printf("Thread %ld has entered the critical section.\n", (long)arg);
+    sleep(1); // Simulate work
+    printf("Thread %ld is leaving the critical section.\n", (long)arg);
+    pthread_mutex_unlock(&lock);
+    return NULL;
+}
+
+int main() {
+    pthread_t threads[3];
+    pthread_mutex_init(&lock, NULL);
+
+    for (long i = 0; i < 3; i++) {
+        pthread_create(&threads[i], NULL, thread_function, (void*)i);
+    }
+
+    for (int i = 0; i < 3; i++) {
+        pthread_join(threads[i], NULL);
+    }
+
+    pthread_mutex_destroy(&lock);
+    return 0;
+}
+// condition variable
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+
+pthread_mutex_t lock;
+pthread_cond_t cond;
+int ready = 0;
+
+void* wait_for_signal(void* arg) {
+    pthread_mutex_lock(&lock);
+    while (!ready) {
+        pthread_cond_wait(&cond, &lock);
+    }
+    printf("Thread %ld received the signal.\n", (long)arg);
+    pthread_mutex_unlock(&lock);
+    return NULL;
+}
+
+void* send_signal(void* arg) {
+    sleep(2); // Simulate some work
+    pthread_mutex_lock(&lock);
+    ready = 1;
+    pthread_cond_signal(&cond);
+    pthread_mutex_unlock(&lock);
+    printf("Thread %ld sent the signal.\n", (long)arg);
+    return NULL;
+}
+
+int main() {
+    pthread_t threads[2];
+    pthread_mutex_init(&lock, NULL);
+    pthread_cond_init(&cond, NULL);
+
+    pthread_create(&threads[0], NULL, wait_for_signal, (void*)0);
+    pthread_create(&threads[1], NULL, send_signal, (void*)1);
+
+    for (int i = 0; i < 2; i++) {
+        pthread_join(threads[i], NULL);
+    }
+
+    pthread_cond_destroy(&cond);
+    pthread_mutex_destroy(&lock);
+    return 0;
+}
+//read write
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+
+pthread_rwlock_t rwlock;
+
+void* reader_function(void* arg) {
+    pthread_rwlock_rdlock(&rwlock);
+    printf("Reader %ld is reading.\n", (long)arg);
+    sleep(1); // Simulate reading
+    printf("Reader %ld finished reading.\n", (long)arg);
+    pthread_rwlock_unlock(&rwlock);
+    return NULL;
+}
+
+void* writer_function(void* arg) {
+    pthread_rwlock_wrlock(&rwlock);
+    printf("Writer %ld is writing.\n", (long)arg);
+    sleep(2); // Simulate writing
+    printf("Writer %ld finished writing.\n", (long)arg);
+    pthread_rwlock_unlock(&rwlock);
+    return NULL;
+}
+
+int main() {
+    pthread_t readers[3], writers[2];
+    pthread_rwlock_init(&rwlock, NULL);
+
+    for (long i = 0; i < 3; i++) {
+        pthread_create(&readers[i], NULL, reader_function, (void*)i);
+    }
+    for (long i = 0; i < 2; i++) {
+        pthread_create(&writers[i], NULL, writer_function, (void*)i + 3);
+    }
+
+    for (int i = 0; i < 3; i++) {
+        pthread_join(readers[i], NULL);
+    }
+    for (int i = 0; i < 2; i++) {
+        pthread_join(writers[i], NULL);
+    }
+
+    pthread_rwlock_destroy(&rwlock);
+    return 0;
+} 
+//spin lock
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+
+pthread_spinlock_t spinlock;
+
+void* thread_function(void* arg) {
+    pthread_spin_lock(&spinlock);
+    printf("Thread %ld has entered the critical section.\n", (long)arg);
+    sleep(1); // Simulate work
+    printf("Thread %ld is leaving the critical section.\n", (long)arg);
+    pthread_spin_unlock(&spinlock);
+    return NULL;
+}
+
+int main() {
+    pthread_t threads[3];
+    pthread_spin_init(&spinlock, PTHREAD_PROCESS_PRIVATE);
+
+    for (long i = 0; i < 3; i++) {
+        pthread_create(&threads[i], NULL, thread_function, (void*)i);
+    }
+
+    for (int i = 0; i < 3; i++) {
+        pthread_join(threads[i], NULL);
+    }
+
+    pthread_spin_destroy(&spinlock);
+    return 0;
+}
