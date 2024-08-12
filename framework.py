@@ -84,6 +84,12 @@ class FileComparerApp:
         self.notebook = ttk.Notebook(root)
         self.notebook.pack(expand=1, fill='both')
 
+        style = ttk.Style()
+        style.configure('TFrame', background='lavender')
+        style.configure('TButton', background='lightgreen')
+        style.configure('TLabel', background='lightgray')
+
+
         # Tab 1: File Comparison
         self.tab1 = ttk.Frame(self.notebook)
         self.notebook.add(self.tab1, text='File Comparison')
