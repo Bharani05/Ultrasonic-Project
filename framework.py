@@ -174,3 +174,40 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = FileComparerApp(root)
     root.mainloop()
+//update
+import tkinter as tk
+from tkinter import filedialog
+from tkinter import scrolledtext
+
+def on_button_click():
+    label.config(text="Button Clicked!")
+
+def browse_file():
+    file_path = filedialog.askopenfilename(title="Select a File", filetypes=(("Text files", "*.txt"),("All files","*.*")))
+    if file_path:
+        # Add file path to the log box
+        log_box.insert(tk.END, file_path + '\n')
+        log_box.yview(tk.END)  # Auto-scroll to the end of the log box
+
+root = tk.Tk()
+root.title("Simple Tkinter App for Bharani")
+root.geometry("500x500")
+root.config(bg="lightblue")
+
+label = tk.Label(root, text="Hello, Tkinter!", bg="lightyellow", fg="black")
+label.pack(pady=10)
+
+button = tk.Button(root, text="Click Me", command=on_button_click, bg="lavender", fg="black")
+button.pack(pady=10)
+
+browse_button = tk.Button(root, text="Browse", command=browse_file, bg="blue", fg="white")
+browse_button.pack(side="top", padx=5)
+
+close_button = tk.Button(root, text="Close", command=root.quit, bg="red", fg="white")
+close_button.pack(pady=10)
+
+# Create the log box
+log_box = scrolledtext.ScrolledText(root, wrap=tk.WORD, height=10, width=50, bg="white", fg="black")
+log_box.pack(pady=10)
+
+root.mainloop()
