@@ -151,4 +151,43 @@ static int v4l2_dolby_fh_open(struct file *filp)
     }
 
     INIT_WORK(&p->dolby_noti_work, dolby_noti_ws);
+
+Socket communication in **Inter-Process Communication (IPC)** is a mechanism that allows processes to communicate with each other over a network, whether they are on the same machine or across different machines. It is a fundamental concept in network programming, enabling data exchange between a client and a server through a bidirectional communication channel called a **socket**.
+
+### Key Concepts in Socket Communication
+
+1. **Sockets**:
+   - A socket is an endpoint for sending or receiving data between processes. It acts as an interface between the application layer and the transport layer in a network stack.
+   - Sockets can be used for communication between processes on the same machine (local communication) or processes on different machines (remote communication).
+
+2. **Types of Sockets**:
+   - **Stream Sockets (TCP)**: Provide reliable, connection-oriented communication. The data sent over TCP sockets is guaranteed to arrive in the same order in which it was sent.
+   - **Datagram Sockets (UDP)**: Provide connectionless communication, where the data is sent as individual packets. UDP sockets are faster but do not guarantee the delivery or order of the packets.
+
+3. **Socket Domains**:
+   - **AF_INET**: Used for IPv4 communication over the internet.
+   - **AF_INET6**: Used for IPv6 communication.
+   - **AF_UNIX**: Used for communication between processes on the same machine.
+
+4. **Socket Communication Steps**:
+   - A typical socket communication process involves the following steps:
+
+### Client-Server Model
+
+1. **Server Side**:
+   - **Create a Socket**: The server creates a socket that will be used to accept client connections.
+     ```c
+     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+     ```
+     - `AF_INET` is the address family for IPv4.
+     - `SOCK_STREAM` indicates a TCP socket.
+   
+   - **Bind the Socket**: The server binds the socket to a specific port on the host machine.
+     ```c
+     bind(sockfd, (struct sockaddr *)&address, sizeof(address));
+     ```
+   
+   - **Listen for Connections**: The server listens for incoming client connections.
+     ```c
+
    
