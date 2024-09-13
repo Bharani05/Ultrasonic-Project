@@ -1,0 +1,108 @@
+ echo 1 0 1 1 0 /var/Sample_TV_IDK_5.0_int3_new.cfg > /proc/lg/dolby/dolby_debug     
+         Update the Main PQ configuration file :  configuration file path → var/Sample_TV_IDK_5.0_int3_new.cfg
+          1st arg    →   1 : Function number for Dolby Debug status.
+          2nd arg   →   0 : Window ID ( win0 - 0 ,win1 - 1 ,win2 - 2 ,win3 - 3 )
+          3rd arg    →   1 Dolby Thread Enable disable (0:Disbale 1:Enable) 
+          4th arg    →   1   HDR  IPC mode  "LX_HDR_MODE_T" enum elaborated HDR mode  (0 : HDR OFF (STD mode) 1: DOLBY HDR 6: DOLBY LL 8:Dolby RF )  
+          5th arg    →   0   Configuration type (0: Main config  1:Best Config)
+          6th arg    →   /var/Sample_TV_IDK_5.0_int3_new.cfg   Configuration path on target   
+
+
+     2. echo 1 0 1 1 1 /var/Sample_TV_IDK_5.0_int3_new.cfg > /proc/lg/dolby/dolby_debug
+         Update the Best PQ configuration file :  configuration file path → var/Sample_TV_IDK_5.0_int3_new.cfg
+          1st arg    →   1 : Function number for Dolby Debug status.
+          2nd arg   →   0 : Window ID ( win0 - 0 ,win1 - 1 ,win2 - 2 ,win3 - 3 )
+          3rd arg    →   1 Dolby Thread Enable disable (0:Disbale 1:Enable) 
+          4th arg    →   1   HDR  IPC mode  "LX_HDR_MODE_T" enum elaborated HDR mode  (0 : HDR OFF (STD mode) 1: DOLBY HDR 6: DOLBY LL 8:Dolby RF )  
+          5th arg    →   1   Configuration type (0: Main config  1:Best Config)
+          6th arg    →   /var/Sample_TV_IDK_5.0_int3_new.cfg   Configuration path on target   
+
+
+Dolby HDR Debug Status commands :
+
+      3. echo 9 0 > /proc/lg/dolby/dolby_debug
+          This command  gives the Dolby driver information like PQ mode, Configuration file and  Dolby version.
+            1st arg    →   9 : Function number for Dolby Debug status.
+             2nd arg   →   0 : Window ID ( win0 - 0 ,win1 - 1 ,win2 - 2 ,win3 - 3 )
+          
+
+      4. echo 14 0 > /proc/lg/de/v4l2_vsc_debug_func
+           This command use for switching CPU prompt (Shell prompt) to Firmware prompt.
+            1st arg    →   14 : Function number for switch cpu to mcu prompt .
+             2nd arg   →   0 : Window ID ( win0 - 0 ,win1 - 1 ,win2 - 2 ,win3 - 3 )
+          
+
+
+
+Change PQ mode commands:
+
+
+       5.  echo 6 0 0 > /proc/lg/dolby/dolby_debug
+            This command use for change current  PQ mode to Vivid mode
+            1st arg    →   6 : Function number for PQ mode update.
+             2nd arg   →   0 : Window ID ( win0 - 0 ,win1 - 1 ,win2 - 2 ,win3 - 3 )
+             3rd  arg   →  0 : PQ mode ( 0: Vivid 1: Bright ,2:Dark ,3: standard ,4 :Game)
+           
+
+
+       6. echo 6 0 1 > /proc/lg/dolby/dolby_debug
+           This command use for change current  PQ mode to Bright mode
+           1st arg    →   6 : Function number for PQ mode update.
+            2nd arg   →   0 : Window ID ( win0 - 0 ,win1 - 1 ,win2 - 2 ,win3 - 3 )
+            3rd  arg   →  1 : PQ mode ( 0: Vivid 1: Bright ,2:Dark ,3: standard ,4 :Game)
+
+
+       7. echo 6 0 2 > /proc/lg/dolby/dolby_debug
+           This command use for change current  PQ mode to Dark mode
+           1st arg    →   6 : Function number for PQ mode update.
+            2nd arg   →   0 : Window ID ( win0 - 0 ,win1 - 1 ,win2 - 2 ,win3 - 3 )
+            3rd  arg   →  2 : PQ mode ( 0: Vivid 1: Bright ,2:Dark ,3: standard ,4 :Game)
+
+
+        8. echo 6 0 3 > /proc/lg/dolby/dolby_debug
+            This command use for change current  PQ mode to Standard mode
+            1st arg    →   6 : Function number for PQ mode update.
+             2nd arg   →   0 : Window ID ( win0 - 0 ,win1 - 1 ,win2 - 2 ,win3 - 3 )
+             3rd  arg   →  3 : PQ mode ( 0: Vivid 1: Bright ,2:Dark ,3: standard ,4 :Game)
+
+
+       9. echo 6 0 4 > /proc/lg/dolby/dolby_debug
+           This command use for change current  PQ mode to Game mode.
+           1st arg    →   6 : Function number for PQ mode update.
+             2nd arg   →   0 : Window ID ( win0 - 0 ,win1 - 1 ,win2 - 2 ,win3 - 3 )
+             3rd  arg   →  4 : PQ mode ( 0: Vivid 1: Bright ,2:Dark ,3: standard ,4 :Game)
+
+
+
+Dump Dolby LUT,Register and DM Metadata and Composer Metadata.
+
+
+       10.echo 3 0 1 120 > /proc/lg/dolby/dolby_debug
+            This command used for dump Composer metadata for Dolby test vector. 
+             1st arg    →   3 : Function number for composer metadata dump.
+             2nd arg   →   0 : Window ID ( win0 - 0 ,win1 - 1 ,win2 - 2 ,win3 - 3 )
+             3rd  arg   →  1 : Debug Value ( 0: Disable  1: Enable)
+             4th  arg   →  120 : No of Frame dumps (Test vector having 120 frame )
+
+       11. echo 4 0 1 120 > /proc/lg/dolby/dolby_debug
+            This command used for dump DM metadata for Dolby test vector. 
+             1st arg    →   4 : Function number  for DM metadata dump.
+             2nd arg   →   0 : Window ID ( win0 - 0 ,win1 - 1 ,win2 - 2 ,win3 - 3 )
+             3rd  arg   →  1 : Debug Value ( 0: Disable  1: Enable)
+             4th  arg   →  120 : No of Frame dumps (Test vector having 120 frame )
+
+
+       12. echo 5 0 1 120 > /proc/lg/dolby/dolby_debug
+             This command used for dump LUT for Dolby test vector. 
+             1st arg    →   5 : Function number for Dolby LUT dump.
+             2nd arg   →   0 : Window ID ( win0 - 0 ,win1 - 1 ,win2 - 2 ,win3 - 3 )
+             3rd  arg   →  1 : Debug Value ( 0: Disable  1: Enable)
+             4th  arg   →  120 : No of Frame dumps (Test vector having 120 frame )
+
+
+       13. echo 14 0 1 120 > /proc/lg/dolby/dolby_debug
+             This command used for dump APB Registers for Dolby test vector. 
+            1st arg    →   14 : Function number for Dolby Register dump.
+             2nd arg   →   0 : Window ID ( win0 - 0 ,win1 - 1 ,win2 - 2 ,win3 - 3 )
+             3rd  arg   →  1 : Debug Value ( 0: Disable  1: Enable)
+             4th  arg   →  120 : No of Frame dumps (Test vector having 120 fram
