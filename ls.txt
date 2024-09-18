@@ -1,0 +1,61 @@
+Screen remote button
+luna-send -f -n 1 luna://com.lge.inputgenerator/pushKeyEvent '{"keycodenum":994, "eventtype":"keypressed"}'
+
+Command for all remote keys
+1. Volume up
+luna-send -f -n 1 luna://com.lge.inputgenerator/pushKeyEvent '{"keycodenum":115, "eventtype":"keypressed"}'
+2. Setting Key
+luna-send -f -n 1 luna://com.lge.inputgenerator/pushKeyEvent '{"keycodenum":139, "eventtype":"keypressed"}'
+3. Screen Remote Key
+luna-send -f -n 1 luna://com.lge.inputgenerator/pushKeyEvent '{"keycodenum":994, "eventtype":"keypressed"}'
+4. home Key
+luna-send -f -n 1 luna://com.lge.inputgenerator/pushKeyEvent '{"keycodenum": 773, "eventtype":"keypressed"}'
+5. ch up Key
+luna-send -f -n 1 luna://com.lge.inputgenerator/pushKeyEvent '{"keycodenum": 402, "eventtype":"keypressed"}'
+6. ch down Key
+luna-send -f -n 1 luna://com.lge.inputgenerator/pushKeyEvent '{"keycodenum": 403, "eventtype":"keypressed"}'
+7. ch up Key
+luna-send -f -n 1 luna://com.lge.inputgenerator/pushKeyEvent '{"keycodenum": 402, "eventtype":"keypressed"}'
+8. ch down Key
+luna-send -f -n 1 luna://com.lge.inputgenerator/pushKeyEvent '{"keycodenum": 403, "eventtype":"keypressed"}'
+9. Left Key
+luna-send -f -n 1 luna://com.lge.inputgenerator/pushKeyEvent '{"keycodenum": 105, "eventtype":"keypressed"}'
+10. Right Key
+luna-send -f -n 1 luna://com.lge.inputgenerator/pushKeyEvent '{"keycodenum": 106, "eventtype":"keypressed"}'
+11. Up Key
+luna-send -f -n 1 luna://com.lge.inputgenerator/pushKeyEvent '{"keycodenum": 103, "eventtype":"keypressed"}'
+12. Down Key
+luna-send -f -n 1 luna://com.lge.inputgenerator/pushKeyEvent '{"keycodenum": 108, "eventtype":"keypressed"}'
+13. enter Key
+luna-send -f -n 1 luna://com.lge.inputgenerator/pushKeyEvent '{"keycodenum": 28, "eventtype":"keypressed"}'
+14. exit Key
+luna-send -f -n 1 luna://com.lge.inputgenerator/pushKeyEvent '{"keycodenum": 174, "eventtype":"keypressed"}'
+15. mute Key
+luna-send -f -n 1 luna://com.lge.inputgenerator/pushKeyEvent '{"keycodenum": 113, "eventtype":"keypressed"}'
+16. back Key
+luna-send -f -n 1 luna://com.lge.inputgenerator/pushKeyEvent '{"keycodenum": 412, "eventtype":"keypressed"}'
+17. click Key
+luna-send -f -n 1 luna://com.lge.inputgenerator/pushMouseEvent'{"eventtype":"click", "eventtype":"keypressed"}'
+18. Record
+luna-send -f -n 1 luna://com.lge.inputgenerator/pushKeyEvent '{"keycodenum": 167}'
+19. Voice
+luna-send -f -n 1 luna://com.lge.inputgenerator/pushKeyEvent '{"keycodenum": 428}'
+Additional reference in Collab
+http://collab.lge.com/main/display/~jongson.kim/Input+Generator+Service+API 
+
+20. Luna command for instop
+luna-send -n 1 -f luna://com.webos.service.devicereset/doReset '{ "resetType" : "instop", "reboot" : true, "osdNeed" : false }'
+
+21. Luna command for setting serial baudrate [115200]
+luna-send -n 1 -f luna://com.webos.service.terminalmanager/setBaudRate '{ "baudrate" : 7 }'
+
+22.
+luna-send -n 1 -f luna://com.lge.settingsservice/setSystemSettings '{"category":"picture", "settings":{"dolbyPrecisionDetail":"off"}}'
+23.
+luna-send -n 1 -f luna://com.lge.settingsservice/setSystemSettings '{"category":"picture", "settings":{"dolbyPrecisionDetail":"on"}}'
+
+24. Instart menu
+luna-send -n 1 -f luna://com.webos.applicationManager/launch '{"id":"com.webos.app.factorywin", "params":{"id":"executeFactory", "irKey":"inStart"}}'
+
+25. Adjust
+luna-send -n 1 -f luna://com.webos.applicationManager/launch '{"id":"com.webos.app.factorywin", "params":{"id":"executeFactory", "irKey":"Adjust"}}'
