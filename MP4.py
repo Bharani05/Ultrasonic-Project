@@ -141,3 +141,260 @@ if __name__ == "__main__":
     app = MP4GeneratorApp(root)
     app.pack(fill="both", expand=True)
     root.mainloop()
+
+//golden
+import tkinter as tk
+from tkinter import filedialog, messagebox
+from tkinter import ttk
+import os
+from tkinter.scrolledtext import ScrolledText
+import subprocess
+import re
+
+class WidgetFrame(tk.Frame):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.grid(padx=10, pady=10, sticky="nsew")
+
+        # Frame for Source Code Build Section
+        self.create_build_frame()
+
+        # Frame for Golden Data Generation Section
+        self.create_golden_data_frame()
+
+        # Common Log Box
+        self.create_log_box()
+
+        # Configure row and column weights for resizing
+        self.grid_rowconfigure(2, weight=1)
+        self.grid_columnconfigure(1, weight=1)
+
+    def create_build_frame(self):
+        build_frame = tk.LabelFrame(self, text="Source Code Build", padx=10, pady=10)
+        build_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew", columnspan=3)
+
+        self.folder_path_label = tk.Label(build_frame, text="Selected folder:", bg="silver")
+        self.folder_path_label.grid(row=0, column=0, pady=5, sticky="w")
+
+        self.folder_path_entry = tk.Entry(build_frame, width=50)
+        self.folder_path_entry.grid(row=0, column=1, pady=5, padx=5, sticky="ew")
+
+        self.browse_button = tk.Button(build_frame, text="Browse", command=self.browse_folder, bg="silver")
+        self.browse_button.grid(row=0, column=2, pady=5, padx=5, sticky="ew")
+
+        self.build_button = tk.Button(build_frame, text="Build", command=self.build_source_code, bg="silver")
+        self.build_button.grid(row=1, column=2, pady=5, padx=5, sticky="ew")
+
+    def create_golden_data_frame(self):
+        golden_data_frame = tk.LabelFrame(self, text="Golden Data Generation", padx=10, pady=10)
+        golden_data_frame.grid(row=1, column=0, padx=10, pady=10, sticky="nsew", columnspan=3)
+
+        self.input_label = tk.Label(golden_data_frame, text="Decoder path:", bg="silver")
+        self.input_label.grid(row=0, column=0, pady=5, sticky="w", columnspan=3)
+
+        self.decoder_data_entry = tk.Entry(golden_data_frame, width=50)
+        self.decoder_data_entry.grid(row=0, column=1, pady=5, padx=5, sticky="ew")
+
+        self.input_browse_button = tk.Button(golden_data_frame, text="Browse", command=self.browse_decoder_data, bg="silver")
+        self.input_browse_button.grid(row=0, column=2, pady=5, padx=5, sticky="ew")
+
+        self.referance_file_label = tk.Label(golden_data_frame, text="Reference File:", bg="silver")
+        self.referance_file_label.grid(row=1, column=0, pady=5, sticky="w")
+
+        self.referane_file_entry = tk.Entry(golden_data_frame, width=50)
+        self.referane_file_entry.grid(row=1, column=1, pady=5, padx=5, sticky="ew")
+
+        self.output_browse_button = tk.Button(golden_data_frame, text="Browse", command=self.browse_referance_file, bg="silver")
+        self.output_browse_button.grid(row=1, column=2, pady=5, padx=5, sticky="ew")
+
+        self.config_label = tk.Label(golden_data_frame, text="Config File Path:", bg="silver")
+        self.config_label.grid(row=2, column=0, pady=5, sticky="w")
+
+        self.config_entry = tk.Entry(golden_data_frame, width=50)
+        self.config_entry.grid(row=2, column=1, pady=5, padx=5, sticky="ew")
+
+        self.config_browse_button = tk.Button(golden_data_frame, text="Browse", command=self.browse_config_file, bg="silver")
+        self.config_browse_button.grid(row=2, column=2, pady=5, padx=5, sticky="ew")
+
+        self.testmaterial_label = tk.Label(golden_data_frame, text="Test Material:", bg="silver")
+        self.testmaterial_label.grid(row=3, column=0, pady=5, sticky="w")
+
+        self.testmaterial_entry = tk.Entry(golden_data_frame, width=50)
+        self.testmaterial_entry.grid(row=3, column=1, pady=5, padx=5, sticky="ew")
+
+        self.testmaterial_browse_button = tk.Button(golden_data_frame, text="Browse", command=self.browse_testmaterial, bg="silver")
+        self.testmaterial_browse_button.grid(row=3, column=2, pady=5, padx=5, sticky="ew")
+
+        self.testvectors_label = tk.Label(golden_data_frame, text="Test Vectors:", bg="silver")
+        self.testvectors_label.grid(row=4, column=0, pady=5, sticky="w")
+
+        self.testvectors_combobox = ttk.Combobox(golden_data_frame, state="readonly")
+        self.testvectors_combobox.grid(row=4, column=1, pady=5, padx=5, sticky="nsew")
+
+        self.generate_button = tk.Button(golden_data_frame, text="Generate Golden Data", command=self.generate_golden_data, bg="silver")
+        self.generate_button.grid(row=5, column=2, pady=10)
+
+    def create_log_box(self):
+        self.log_box = ScrolledText(self, wrap=tk.WORD, height=10, width=70, bg="black", fg="white")
+        self.log_box.grid(row=2, column=0, columnspan=3, pady=10, sticky="nsew")
+
+        self.clear_log_button = tk.Button(self, text="Clear Log", command=self.clear_log, bg="silver")
+        self.clear_log_button.grid(row=3, column=0, columnspan=3, pady=10)
+
+    def browse_folder(self):
+        folder_selected = filedialog.askdirectory()
+        if folder_selected:
+            self.folder_path_entry.delete(0, tk.END)
+            self.folder_path_entry.insert(0, folder_selected)
+
+    def browse_decoder_data(self):
+        decoder_file = filedialog.askopenfile(filetypes=[("All Files", "*.*")])
+        if decoder_file:
+            self.decoder_data_entry.delete(0, tk.END)
+            self.decoder_data_entry.insert(0, decoder_file.name)
+
+    def browse_referance_file(self):
+        output_file = filedialog.askopenfile(filetypes=[("All Files", "*.*")])
+        if output_file:
+            self.referane_file_entry.delete(0, tk.END)
+            self.referane_file_entry.insert(0, output_file.name)
+
+    def browse_config_file(self):
+        config_file = filedialog.askopenfile(filetypes=[("Config Files", "*.*"), ("All Files", "*.*")])
+        if config_file:
+            self.config_entry.delete(0, tk.END)
+            self.config_entry.insert(0, config_file.name)
+
+    def browse_testmaterial(self):
+        test_material_folder = filedialog.askdirectory()
+        if test_material_folder:
+            self.testmaterial_entry.delete(0, tk.END)
+            self.testmaterial_entry.insert(0, test_material_folder)
+
+            subdirectories = next(os.walk(test_material_folder))[1]
+            if subdirectories:
+                self.testvectors_combobox['values'] = subdirectories
+                self.testvectors_combobox.set('Select Test Vector')
+            else:
+                self.testvectors_combobox['values'] = ["No test vectors found"]
+                self.testvectors_combobox.set("No test vectors found")
+
+    def clear_log(self):
+        self.log_box.delete(1.0, tk.END)
+
+    def generate_golden_data(self):
+        # Get the paths from the entries
+        decoder_file = self.decoder_data_entry.get()
+        reference_file = self.referane_file_entry.get()
+        config_file = self.config_entry.get()
+        test_material_path = self.testmaterial_entry.get()
+        test_vector = self.testvectors_combobox.get()
+
+        if not all([decoder_file, reference_file, config_file, test_material_path, test_vector]):
+            messagebox.showerror("Error", "Please ensure all fields are filled in correctly.")
+            return
+
+        try:
+            # Process the reference file to extract details
+            extracted_portions = process_reference_file(reference_file)
+
+            # Use the extracted details for the command
+            for i, portion in enumerate(extracted_portions, start=1):
+                self.log_box.insert(tk.END, f"Extracted portion for test vector {i}: {portion}\n")
+                self.log_box.see(tk.END)
+
+            # Example command with placeholders
+            resolution = extracted_portions[2]
+            command = f"/home/bharani.vidyaakar/Test_Tools/scripts/fxp_decoder && python {decoder_file} --input {test_material_path}/{test_vector} --r {reference_file} --config {config_file}"
+
+            self.log_box.insert(tk.END, f"Generated command: {command}\n")
+            self.log_box.see(tk.END)
+
+            # Run the generated command
+            process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            self.log_box.insert(tk.END, process.stdout)
+            self.log_box.insert(tk.END, process.stderr)
+            self.log_box.see(tk.END)
+
+        except Exception as e:
+            self.log_box.insert(tk.END, f"Error: {e}\n")
+            self.log_box.see(tk.END)
+            messagebox.showerror("Error", str(e))
+
+    def build_source_code(self):
+        folder_path = self.folder_path_entry.get()
+        if not os.path.isdir(folder_path):
+            messagebox.showerror("Error", "Please select a valid source code folder")
+            return
+
+        cmakelists_path = os.path.join(folder_path, "CMakeLists.txt")
+        if not os.path.isfile(cmakelists_path):
+            messagebox.showerror("Error", f"CMakeLists.txt not found in {folder_path}")
+            return
+
+        try:
+            self.log_box.delete(1.0, tk.END)
+            self.log_box.insert(tk.END, f"Building source code in folder: {folder_path}\n")
+            self.log_box.see(tk.END)
+
+            self.log_box.insert(tk.END, "Running: cmake -Bbuild\n")
+            self.log_box.see(tk.END)
+            result = subprocess.run(["cmake", "-Bbuild"], cwd=folder_path, capture_output=True, text=True)
+            self.log_box.insert(tk.END, result.stdout)
+            self.log_box.insert(tk.END, result.stderr)
+            self.log_box.see(tk.END)
+
+            self.log_box.insert(tk.END, "Running: cmake --build build\n")
+            self.log_box.see(tk.END)
+            result = subprocess.run(["cmake", "--build", "build"], cwd=folder_path, capture_output=True, text=True)
+            self.log_box.insert(tk.END, result.stdout)
+            self.log_box.insert(tk.END, result.stderr)
+            self.log_box.see(tk.END)
+
+            messagebox.showinfo("Success", "Source code built successfully!")
+        except Exception as e:
+            messagebox.showerror("Error", f"Error during build: {str(e)}")
+
+# Helper functions for reference file processing
+def process_reference_file(command):
+    # Dummy implementation for extracting details from a file
+    with open(reference_file_path, 'r') as file:
+            commands = file.readlines()
+
+    extracted_details = []
+
+    for command in commands:
+        cline = extract_details_from_referance_file(command)
+        if cline:
+                extracted_details.append(cline)
+
+        return extracted_details
+
+
+    # Example usage
+    reference_file_path = 'test_vectors.txt'  # Replace with the path to your reference file
+
+    extracted_portions = process_reference_file(reference_file_path)
+
+    # Display the extracted details for each test vector
+    for i, portion in enumerate(extracted_portions, start=1):
+        print(f"Extracted portion for test vector {i}: {portion}")
+
+def extract_details_from_referance_file(command):
+    start = command.find('-r')
+    end = command.find('-fps')
+
+    if start != -1 and end != -1:
+        return command[start:end].strip()
+    else:
+        return None
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    root.title("Golden Data Generator")
+    root.geometry("800x600")
+
+    app = WidgetFrame(root)
+    app.pack(fill="both", expand=True)
+
+    root.mainloop()
