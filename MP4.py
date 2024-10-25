@@ -398,3 +398,174 @@ if __name__ == "__main__":
     app.pack(fill="both", expand=True)
 
     root.mainloop()
+//Upated
+import tkinter as tk
+from tkinter import filedialog, messagebox, scrolledtext
+import os
+import re
+from tkinter import ttk
+import subprocess
+
+
+class MP4GeneratorApp(tk.Frame):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.configure(bg='silver')
+        self.valid_profiles = {}
+        self.valid_track_numbers = {}
+        self.test_vectors = []
+        self.selected_test_vector = tk.StringVar(value="Select Test Vector")
+        self.test_material_folder_path = tk.StringVar()
+        self.batch_file_loaded = False  # Flag to check if the batch file is loaded
+        self.create_widgets()
+
+    def create_widgets(self):
+        self.exe_path = tk.StringVar()
+
+        # .exe file selection
+        tk.Label(self, text="Select .exe file:").grid(row=0, column=0, padx=10, pady=10, sticky='w')
+        tk.Entry(self, textvariable=self.exe_path, width=50).grid(row=0, column=1, padx=10, pady=10, sticky='ew')
+        tk.Button(self, text="Browse", command=self.browse_exe).grid(row=0, column=2, padx=10, pady=10)
+
+        # Test Material folder selection
+        tk.Label(self, text=" Selesct Test Material:").grid(row=1, column=0, padx=10, pady=10, sticky='w')
+        tk.Entry(self, textvariable=self.test_material_folder_path, width=50).grid(row=1, column=1, padx=10, pady=10, sticky='ew')
+        tk.Button(self, text="Browse", command=self.browse_test_material_folder).grid(row=1, column=2, padx=10, pady=10)
+
+        # Button to load the batch file
+        tk.Button(self, text="Load Batch File", command=self.load_batch_file).grid(row=2, column=0, padx=10, pady=10)
+
+        # Test Vector selection via scrollable dropdown
+        #tk.Label(self, text="Select Test Vector:").grid(row=2, column=0, padx=10, pady=10, sticky='w')
+        self.vector_menu = tk.OptionMenu(self, self.selected_test_vector, self.test_vectors)
+        self.vector_menu.grid(row=2, column=1, padx=10, pady=10, sticky='ew')
+        #self.selected_test_vector.trace('w', self.on_test_vector_change)
+
+        # Generate MP4 button
+        tk.Button(self, text="Generate MP4", command=self.generate_mp4).grid(row=2, column=2,  padx=10, pady=10)
+
+        # Log box
+        self.log_box = scrolledtext.ScrolledText(self, wrap=tk.WORD, bg="black", fg="white", font=('Arial', 10))
+        self.log_box.grid(row=3, column=0, columnspan=3, padx=10, pady=10, sticky='nsew')
+
+        # Clear Log button
+        tk.Button(self, text="Clear Log", command=self.clear_log).grid(row=4, column=0, columnspan=3, pady=10)
+
+        # Configure row and column weights
+        self.grid_rowconfigure(3, weight=1)
+        self.grid_columnconfigure(1, weight=1)
+        self.grid_columnconfigure(2, weight=0)
+
+    def browse_exe(self):
+        self.exe_path.set(filedialog.askopenfilename(filetypes=[("Executable files", "*.exe")]))
+
+    def browse_test_material_folder(self):
+        folder_path = filedialog.askdirectory(title="Select Test Material Folder")
+        if folder_path:
+            self.test_material_folder_path.set(folder_path)
+            self.load_test_vectors()
+    
+
+    def load_test_vectors(self):
+        folder_path = self.test_material_folder_path.get()
+        if not folder_path:
+            messagebox.showwarning("Input Required", "Please select a Test Material Folder first.")
+            return
+        
+        # Load all files in the Test Material folder as test vectors
+        self.test_vectors = os.listdir(folder_path)
+        if self.test_vectors:
+            self.selected_test_vector.set(self.test_vectors[0])  # Set default selection
+            menu = self.vector_menu["menu"]
+            menu.delete(0, "end")
+            for vector in self.test_vectors:
+                menu.add_command(label=vector, command=lambda value=vector: self.selected_test_vector.set(value))
+        else:
+            messagebox.showwarning("No Test Vectors Found", "No files were found in the selected folder.")
+
+    def load_batch_file(self):
+        # Open file dialog to select the batch file
+        file_path = filedialog.askopenfilename(filetypes=[("Batch files", "*.bat"), ("All files", "* *")])
+        
+        # If no file is selected, return
+        if not file_path:
+            return
+        
+        # Parse the batch file and store details for all test vectors
+        self.parse_batch_file(file_path)
+        
+        # Log success message
+        self.log_box.insert(tk.END, "Batch file loaded successfully. You can now select test vectors and generate the MP4 file.\n")
+        self.batch_file_loaded = True
+
+    def parse_batch_file(self, file_path):
+        self.valid_profiles.clear()
+        self.valid_track_numbers.clear()
+        
+        with open(file_path, 'r') as file:
+            lines = file.readlines()
+            
+            # Iterate over each line and look for test vector details, including variations like 1a, 1b, etc.
+            for line in lines:
+                test_vector_match = re.search(r'%TEST_VECTORS_ROOT%\\(\d+[a-z]?)', line)
+                
+                if test_vector_match:
+                    test_vector = test_vector_match.group(1)  # Capture test vector with suffix if present
+                    
+                    # Extract track number and DV profile for the chosen test vector
+                    track_number_match = re.search(r'--num-track\s+(\d+)', line)
+                    profile_id_match = re.search(r'--dv-profile\s+([^\s]+)', line)
+
+                    if profile_id_match and track_number_match:
+                        self.valid_profiles[test_vector] = profile_id_match.group(1)
+                        self.valid_track_numbers[test_vector] = track_number_match.group(1)
+
+    def generate_mp4(self):
+        exe_file = self.exe_path.get()
+        test_vector = self.selected_test_vector.get()
+        
+        # Handle suffixes like 1a, 1b, 1c by checking for variations
+        dv_profile_value = self.valid_profiles.get(test_vector, '')
+        track_number = self.valid_track_numbers.get(test_vector, '')
+
+        if not exe_file or not test_vector or not dv_profile_value or not track_number:
+            self.log_box.insert(tk.END, "Please provide all required fields.\n")
+            return
+
+        new_dir = os.path.dirname(exe_file)
+        input_folder = os.path.join(self.test_material_folder_path.get(), test_vector)
+        
+        # Search for .265, .ivf, or .264 files, including subdirectories and variations in file names
+        new_file = None
+        for root, dirs, files in os.walk(input_folder):
+            for f in files:
+                if f.endswith(".265") or f.endswith(".ivf") or f.endswith(".264"):
+                    new_file = os.path.join(root, f)
+                    break
+            if new_file:
+                break
+
+        if not new_file:
+            self.log_box.insert(tk.END, f"No valid video files found in the folder for {test_vector} or its subdirectories.\n")
+            return
+
+        command = f"cd {new_dir} && {exe_file} --input-ves {new_file} --dv-profile {dv_profile_value} --num-track {track_number} "
+        print(command)
+        
+        self.log_box.insert(tk.END, f"Executing command: {command}\n")
+
+        try:
+            process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            stdout, stderr = process.communicate()
+
+            if stdout:
+                self.log_box.insert(tk.END, "Output:\n" + stdout + "\n")
+            if stderr:
+                self.log_box.insert(tk.END, "Errors:\n" + stderr + "\n")
+
+            self.log_box.insert(tk.END, "MP4 generation completed.\n")
+        except Exception as e:
+            self.log_box.insert(tk.END, f"An error occurred: {e}\n")
+
+    def clear_log(self):
+        self.log_box.delete('1.0', tk.END)
