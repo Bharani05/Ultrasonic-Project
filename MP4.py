@@ -569,3 +569,123 @@ class MP4GeneratorApp(tk.Frame):
 
     def clear_log(self):
         self.log_box.delete('1.0', tk.END)
+//Folder.py
+import tkinter as tk
+from tkinter import filedialog, scrolledtext
+import os
+import pandas as pd
+
+class FolderComparerApp(tk.Frame):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.configure(bg='lavender')
+        self.create_widgets()
+    
+    def create_widgets(self):
+        # Folder path labels and browse buttons
+        self.folder1_path = tk.StringVar()
+        self.folder2_path = tk.StringVar()
+
+        tk.Label(self, text="Reference Data:", bg='silver').grid(row=0, column=0, padx=10, pady=10, sticky='w')
+        tk.Entry(self, textvariable=self.folder1_path, width=50).grid(row=0, column=1, padx=10, pady=10, sticky='ew')
+        tk.Button(self, text="Browse", command=self.browse_folder1, bg='silver').grid(row=0, column=2, padx=10, pady=10)
+        
+        tk.Label(self, text="Dumped data:", bg='silver').grid(row=1, column=0, padx=10, pady=10, sticky='w')
+        tk.Entry(self, textvariable=self.folder2_path, width=50).grid(row=1, column=1, padx=10, pady=10, sticky='ew')
+        tk.Button(self, text="Browse", command=self.browse_folder2, bg='silver').grid(row=1, column=2, padx=10, pady=10)
+
+        # Compare button
+        tk.Button(self, text="Compare", command=self.compare_folders, bg='silver').grid(row=2, column=0, columnspan=3, pady=10)
+        
+        # Log box with scrollbars
+        self.log_box = scrolledtext.ScrolledText(self, wrap=tk.WORD, bg="black", fg="white", font=('Courier', 10))
+        self.log_box.grid(row=3, column=0, columnspan=3, padx=10, pady=10, sticky='nsew')
+        
+        # Clear button
+        tk.Button(self, text="Clear Log", command=self.clear_log, bg='silver').grid(row=4, column=0, columnspan=3, pady=10)
+
+        # Configure row and column weights
+        self.grid_rowconfigure(3, weight=1)
+        self.grid_columnconfigure(1, weight=1)
+        self.grid_columnconfigure(2, weight=0)
+
+    def browse_folder1(self):
+        foldername = filedialog.askdirectory()
+        if foldername:
+            self.folder1_path.set(foldername)
+
+    def browse_folder2(self):
+        foldername = filedialog.askdirectory()
+        if foldername:
+            self.folder2_path.set(foldername)
+
+    def compare_folders(self):
+        folder1 = self.folder1_path.get()
+        folder2 = self.folder2_path.get()
+
+        if not folder1 or not folder2:
+            self.log("Both folders must be selected.")
+            return
+
+        try:
+            self.log(f"Comparing folders:\n{os.path.basename(folder1)}\nwith\n{os.path.basename(folder2)}\n")
+
+            # List all .bin files in both folders
+            bin_files1 = [f for f in os.listdir(folder1) if f.endswith('.bin')]
+            bin_files2 = [f for f in os.listdir(folder2) if f.endswith('.bin')]
+
+            matched_files = set()  # Store matched files from second folder
+            data = {'Reference Data': [], 'Result': [], 'Matched Data': [], 'Non-Matched Data': []}
+
+            # Compare each file in folder1 with all files in folder2
+            for file1 in bin_files1:
+                file1_path = os.path.join(folder1, file1)
+                matched = False
+                for file2 in bin_files2:
+                    if file2 in matched_files:
+                        # Skip already matched files
+                        continue
+                    file2_path = os.path.join(folder2, file2)
+                    with open(file1_path, 'rb') as f1, open(file2_path, 'rb') as f2:
+                        content1 = f1.read()
+                        content2 = f2.read()
+
+                        if content1 == content2:
+                            self.log(f"{file1} matches with {file2}")
+                            data['Reference Data'].append(file1)
+                            data['Matched Data'].append(file2)
+                            data['Non-Matched Data'].append("")
+                            data['Result'].append("matched")
+                            matched = True
+                            matched_files.add(file2)  # Mark the file as matched
+                            break  # Exit inner loop once a match is found
+
+                if not matched:
+                    self.log(f"{file1} does not match with any file in the dumped data folder.")
+                    data['Reference Data'].append(file1)
+                    data['Matched Data'].append("")
+                    data['Non-Matched Data'].append(file1)
+                    data['Result'].append("non mathced")
+
+            # Save the data to an Excel sheet
+            df = pd.DataFrame(data)
+            output_file = os.path.join(folder1, "comparison_results.xlsx")
+            df.to_excel(output_file, index=False)
+            self.log(f"Comparison results saved to {output_file}")
+
+        except Exception as e:
+            self.log(f"Error comparing folders: {e}")
+
+    def log(self, message):
+        # Print the message to the terminal
+        print(message)
+
+        # Insert the message into the log box
+        self.log_box.insert(tk.END, message + "\n")
+
+        # Ensure the log box view is updated to the end
+        self.log_box.yview(tk.END)
+
+    def clear_log(self):
+        self.log_box.delete(1.0, tk.END)
+
